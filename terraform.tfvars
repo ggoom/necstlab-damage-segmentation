@@ -1,6 +1,6 @@
 project_name = "bridge-urops"
 username = "kj_kj_kathryn"
-gcp_key_file_location = "Bridge UROPs-a9e2ee09bf11.json"
+gcp_key_file_location = "keys/BridgeUROPs-a9e2ee09bf11.json"
 public_ssh_key_location = "~/.ssh/id_rsa.pub"
 private_ssh_key_location = "~/.ssh/id_rsa"
 repository_name = "necstlab-damage-segmentation"
