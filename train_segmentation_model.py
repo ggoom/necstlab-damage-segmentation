@@ -22,7 +22,8 @@ def sample_image_and_mask_paths(generator, n_paths):
     random.seed(0)
     rand_inds = [random.randint(0, len(generator.image_filenames)-1) for _ in range(n_paths)]
     image_paths = list(np.asarray(generator.image_filenames)[rand_inds])
-    mask_paths = [{c: list(np.asarray(generator.mask_filenames[c]))[i] for c in generator.mask_filenames} for i in rand_inds]
+    mask_paths = list(np.asarray(generator.mask_filenames)[rand_inds])
+    # mask_paths = [{c: list(np.asarray(generator.mask_filenames[c]))[i] for c in generator.mask_filenames} for i in rand_inds]
     return list(zip(image_paths, mask_paths))
 
 
@@ -86,7 +87,7 @@ def train(gcp_bucket, config_file):
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
         train_config['segmentation_model']['model_parameters'],
-        len(train_generator.mask_filenames),
+        1,
         train_config['loss'],
         train_config['optimizer'])
 
@@ -97,7 +98,7 @@ def train(gcp_bucket, config_file):
 
     n_sample_images = 20
     train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
-    validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images)
+    validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, 4)
 
     tensorboard_image_callback = TensorBoardImage(
         log_dir=logs_dir.as_posix(),
@@ -168,7 +169,7 @@ def train(gcp_bucket, config_file):
     metadata = {
         'gcp_bucket': gcp_bucket,
         'created_datetime': datetime.now(pytz.UTC).strftime('%Y%m%dT%H%M%SZ'),
-        'num_classes': len(train_generator.mask_filenames),
+        'num_classes': 1,
         'target_size': target_size,
         'git_hash': git.Repo(search_parent_directories=True).head.object.hexsha,
         'original_config_filename': config_file,

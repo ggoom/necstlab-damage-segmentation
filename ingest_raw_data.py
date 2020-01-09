@@ -38,22 +38,22 @@ def process_zip(gcp_bucket, zipped_stack):
         pass
     tmp_directory.mkdir()
 
-    is_annotation = 'dmg' in zipped_stack
+    is_mask = 'masks' in zipped_stack
 
     stack_id = Path(zipped_stack).name.split('.')[0]
-    split_strings = ['_8bit', '-', '_dmg']
+    split_strings = ['_8bit', '-', '_masks']
     for s in split_strings:
         stack_id = stack_id.split(s)[0]
 
     stack_dir = Path(tmp_directory, stack_id)
 
-    if not is_annotation and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "images"):
+    if not is_mask and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "images"):
 
         print("{} has already been processed! Skipping...".format(os.path.join(stack_id, "images")))
 
-    elif is_annotation and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "annotations"):
+    elif is_mask and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "masks"):
 
-        print("{} has already been processed! Skipping...".format(os.path.join(stack_id, "annotations")))
+        print("{} has already been processed! Skipping...".format(os.path.join(stack_id, "masks")))
 
     else:
 
@@ -74,7 +74,7 @@ def process_zip(gcp_bucket, zipped_stack):
                 Image.open(f).convert("L").save(f)
 
         shutil.move(unzipped_dir.as_posix(),
-                    Path(unzipped_dir.parent, 'annotations' if is_annotation else 'images').as_posix())
+                    Path(unzipped_dir.parent, 'masks' if is_mask else 'images').as_posix())
 
         # get metadata file, if exists
         os.system("gsutil -m cp -r '{}' '{}'".format(os.path.join(gcp_bucket, 'processed-data/', stack_id, metadata_file_name),
@@ -86,12 +86,12 @@ def process_zip(gcp_bucket, zipped_stack):
         except FileNotFoundError:
             metadata = {}
 
-        metadata.update({'annotations' if is_annotation else 'images': {
+        metadata.update({'masks' if is_mask else 'images': {
             'gcp_bucket': gcp_bucket,
             'zipped_stack_file': zipped_stack,
             'created_datetime': datetime.now(pytz.UTC).strftime('%Y%m%dT%H%M%SZ'),
             'original_number_of_files_in_zip': original_number_of_files_in_zip,
-            'number_of_images': len(list(Path(unzipped_dir.parent, 'annotations' if is_annotation else 'images').iterdir())),
+            'number_of_images': len(list(Path(unzipped_dir.parent, 'masks' if is_mask else 'images').iterdir())),
             'git_hash': git.Repo(search_parent_directories=True).head.object.hexsha},
             'elapsed_minutes': round((datetime.now() - start_dt).total_seconds() / 60, 1)
         })
