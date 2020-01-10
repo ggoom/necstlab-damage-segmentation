@@ -118,7 +118,7 @@ def train(gcp_bucket, config_file):
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
 
     sys.stdout.write(str(metric_names))
-    sys.stdout.write(results.history)
+    sys.stdout.write(str(results.history))
 
     for metric_name in metric_names:
 
