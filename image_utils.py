@@ -36,16 +36,20 @@ def overlay_masks(images, masks):
         image_file, mask_file = images, masks
         image = np.asarray(Image.open(image_file).convert('RGB'))
         mask = np.asarray(Image.open(mask_file).convert('RGB'))
-        boolmask = mask.astype(bool)
+        # boolmask = mask.astype(bool)
         composite_image = image.copy()
-        sys.stdout.write(str(composite_image.shape))
-        # sys.stdout.write(str(mask))
-        for i in range(512):
-            for j in range(512):
-                rgb = boolmask[i, j]
-                if not rgb[0] == rgb[1] == rgb[2]:
-                    sys.stdout.write("HELLO")
-        composite_image[mask.astype(bool)] = [0, 255, 0]
+        # sys.stdout.write(str(composite_image.shape))
+        # sys.stdout.write(str(boolmask.shape))
+        # sys.stdout.write(str(composite_image[0, 0]))
+        # sys.stdout.write(str(boolmask[0, 0]))
+        # for i in range(512):
+        #     for j in range(512):
+        #         rgb = boolmask[i, j]
+        #         if not rgb[0] == rgb[1] == rgb[2]:
+        #             sys.stdout.write("HELLO")
+        mask_slice = mask[:, :, 0]
+        composite_image[mask_slice == 255] = [0, 255, 0]
+        print("hooray")
         # for c in masks:
         #     if class_RGB_mapping[c] is not None:
         #         composite_image[masks[c].astype(bool)] = class_RGB_mapping[c]
