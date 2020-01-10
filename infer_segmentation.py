@@ -93,6 +93,13 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
     assert "gs://" in gcp_bucket
 
+    # clean up the tmp directory
+    try:
+        shutil.rmtree(tmp_directory.as_posix())
+    except FileNotFoundError:
+        pass
+    tmp_directory.mkdir()
+
     run_name = '{}_{}'.format(stack_id, model_id)
 
     local_model_dir = Path(tmp_directory, 'models', model_id)
