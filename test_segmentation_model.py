@@ -55,7 +55,7 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
         train_config['segmentation_model']['model_parameters'],
-        len(test_generator.mask_filenames),
+        1,
         train_config['loss'],
         train_config['optimizer'],
         Path(local_model_dir, model_id, "model.hdf5").as_posix())
