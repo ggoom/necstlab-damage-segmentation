@@ -49,7 +49,6 @@ def overlay_masks(images, masks):
         #             sys.stdout.write("HELLO")
         # mask_slice = mask[:, :, 0]
         composite_image[mask[:, :, 0] == 255] = [0, 255, 0]
-        print("hooray")
         # for c in masks:
         #     if class_RGB_mapping[c] is not None:
         #         composite_image[masks[c].astype(bool)] = class_RGB_mapping[c]
