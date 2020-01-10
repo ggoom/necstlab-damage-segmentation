@@ -62,7 +62,7 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
         Path(local_model_dir, model_id, "model.hdf5").as_posix())
 
     sys.stdout.write(str(compiled_model.summary()))
-    results = compiled_model.evaluate_generator(test_generator)
+    results = compiled_model.evaluate_generator(test_generator, verbose=1)
 
     metric_names = [compiled_model.loss.__name__] + [m.name for m in compiled_model.metrics]
     with Path(test_dir, 'metrics.csv').open('w') as f:
