@@ -9,6 +9,7 @@ from gcp_utils import copy_folder_locally_if_missing
 from image_utils import ImagesAndMasksGenerator
 from models import generate_compiled_segmentation_model
 
+import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -60,6 +61,7 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
         train_config['optimizer'],
         Path(local_model_dir, model_id, "model.hdf5").as_posix())
 
+    sys.stdout.write(str(compiled_model.summary()))
     results = compiled_model.evaluate_generator(test_generator)
 
     metric_names = [compiled_model.loss.__name__] + [m.name for m in compiled_model.metrics]
