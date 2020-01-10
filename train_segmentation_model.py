@@ -12,6 +12,7 @@ from image_utils import TensorBoardImage, ImagesAndMasksGenerator
 import git
 from gcp_utils import copy_folder_locally_if_missing
 from models import generate_compiled_segmentation_model
+import sys
 
 
 metadata_file_name = 'metadata.yaml'
@@ -115,6 +116,9 @@ def train(gcp_bucket, config_file):
         callbacks=[model_checkpoint_callback, tensorboard_callback, tensorboard_image_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
+
+    sys.stdout.write(str(metric_names))
+    sys.stdout.write(results.history)
 
     for metric_name in metric_names:
 
