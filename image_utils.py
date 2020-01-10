@@ -38,9 +38,9 @@ def overlay_masks(images, masks):
         mask = np.asarray(Image.open(mask_file).convert('RGB'))
 
         composite_image = image.copy()
-        sys.stdout.write(str(image.shape))
-        sys.stdout.write(str(mask.shape))
-        composite_image[mask.astype(bool)] = custom_map['dummy']
+        # sys.stdout.write(str(image.shape))
+        sys.stdout.write(str(mask))
+        composite_image[mask.astype(bool)] = [0, 255, 0]
         # for c in masks:
         #     if class_RGB_mapping[c] is not None:
         #         composite_image[masks[c].astype(bool)] = class_RGB_mapping[c]
