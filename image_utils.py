@@ -7,7 +7,7 @@ from keras.utils import Sequence
 import keras
 from PIL import Image
 import io
-# import sys
+import sys
 
 
 class_RGB_mapping = {
@@ -38,7 +38,7 @@ def overlay_masks(images, masks):
         mask = np.asarray(Image.open(mask_file).convert('RGB'))
 
         composite_image = image.copy()
-        # sys.stdout.write(custom_map)
+        sys.stdout.write(image.shape, mask.shape)
         composite_image[mask.astype(bool)] = custom_map['dummy']
         # for c in masks:
         #     if class_RGB_mapping[c] is not None:
