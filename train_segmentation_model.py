@@ -126,8 +126,8 @@ def train(gcp_bucket, config_file):
         for split in ['train', 'validate']:
 
             key_name = metric_name
-            # if split == 'validate':
-            #     key_name = 'val_' + key_name
+            if split == 'validate':
+                key_name = 'val_' + key_name
 
             ax.plot(range(epochs), results.history[key_name], label=split)
         ax.set_xlabel('epochs')
@@ -150,8 +150,8 @@ def train(gcp_bucket, config_file):
         for split in ['train', 'validate']:
 
             key_name = metric_name
-            # if split == 'validate':
-            #     key_name = 'val_' + key_name
+            if split == 'validate':
+                key_name = 'val_' + key_name
 
             axes[counter_m, counter_n].plot(range(epochs), results.history[key_name], label=split)
         axes[counter_m, counter_n].set_xlabel('epochs')
