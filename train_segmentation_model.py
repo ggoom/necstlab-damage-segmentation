@@ -99,7 +99,7 @@ def train(gcp_bucket, config_file):
 
     n_sample_images = 20
     train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
-    validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, 4)
+    validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images)
 
     tensorboard_image_callback = TensorBoardImage(
         log_dir=logs_dir.as_posix(),
