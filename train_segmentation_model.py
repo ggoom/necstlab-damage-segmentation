@@ -8,7 +8,7 @@ from datetime import datetime
 import pytz
 import matplotlib.pyplot as plt
 from keras.callbacks import ModelCheckpoint, TensorBoard, CSVLogger
-from image_utils import TensorBoardImage, ImagesAndMasksGenerator
+from image_utils import TensorBoardImage, ImagesAndMasksGenerator, trainGenerator
 import git
 from gcp_utils import copy_folder_locally_if_missing
 from models import generate_compiled_segmentation_model
@@ -68,14 +68,32 @@ def train(gcp_bucket, config_file):
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
 
-    train_generator = ImagesAndMasksGenerator(
-        Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
-        rescale=1./255,
-        target_size=target_size,
-        batch_size=batch_size,
-        shuffle=True,
-        random_rotation=train_config['data_augmentation']['random_90-degree_rotations'],
-        seed=train_config['training_data_shuffle_seed'])
+    aug_dict = dict(rotation_range=0.2,  # TODO: move to training config file
+                    width_shift_range=0.05,
+                    height_shift_range=0.05,
+                    shear_range=0.05,
+                    zoom_range=0.05,
+                    horizontal_flip=True,
+                    fill_mode='nearest')
+    if aug_dict:
+        train_generator = trainGenerator(
+            batch_size=batch_size,  # TODO: don't hardcode
+            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
+            image_folder='images',
+            mask_folder='masks',
+            aug_dict=aug_dict,
+            target_size=target_size,
+            seed=train_config['training_data_shuffle_seed'])
+
+    else:
+        train_generator = ImagesAndMasksGenerator(
+            Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
+            rescale=1./255,
+            target_size=target_size,
+            batch_size=batch_size,
+            shuffle=True,
+            random_rotation=train_config['data_augmentation']['random_90-degree_rotations'],
+            seed=train_config['training_data_shuffle_seed'])
 
     validation_generator = ImagesAndMasksGenerator(
         Path(local_dataset_dir, train_config['dataset_id'],
@@ -96,23 +114,23 @@ def train(gcp_bucket, config_file):
     tensorboard_callback = TensorBoard(log_dir=logs_dir.as_posix(), batch_size=batch_size, write_graph=True,
                                        write_grads=False, write_images=True, update_freq='epoch')
 
-    n_sample_images = 20
-    train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
-    validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images)
+    # n_sample_images = 20
+    # train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
+    # validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images)
 
-    tensorboard_image_callback = TensorBoardImage(
-        log_dir=logs_dir.as_posix(),
-        images_and_masks_paths=train_image_and_mask_paths + validation_image_and_mask_paths)
+    # tensorboard_image_callback = TensorBoardImage(
+    #     log_dir=logs_dir.as_posix(),
+    #     images_and_masks_paths=train_image_and_mask_paths + validation_image_and_mask_paths)
 
     csv_logger_callback = CSVLogger(Path(model_dir, 'metrics.csv').as_posix(), append=True)
 
     results = compiled_model.fit_generator(
         train_generator,
-        steps_per_epoch=len(train_generator),
+        steps_per_epoch=300,
         epochs=epochs,
         validation_data=validation_generator,
         validation_steps=len(validation_generator),
-        callbacks=[model_checkpoint_callback, tensorboard_callback, tensorboard_image_callback, csv_logger_callback])
+        callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
 
