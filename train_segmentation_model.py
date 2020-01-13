@@ -77,8 +77,17 @@ def train(gcp_bucket, config_file):
                     fill_mode='nearest')
     if aug_dict:
         train_generator = trainGenerator(
-            batch_size=batch_size,  # TODO: don't hardcode
+            batch_size=batch_size,
             train_path=Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
+            image_folder='images',
+            mask_folder='masks',
+            aug_dict=aug_dict,
+            target_size=target_size,
+            seed=train_config['training_data_shuffle_seed'])
+
+        validation_generator = trainGenerator(
+            batch_size=batch_size,
+            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix(),
             image_folder='images',
             mask_folder='masks',
             aug_dict=aug_dict,
@@ -95,12 +104,12 @@ def train(gcp_bucket, config_file):
             random_rotation=train_config['data_augmentation']['random_90-degree_rotations'],
             seed=train_config['training_data_shuffle_seed'])
 
-    validation_generator = ImagesAndMasksGenerator(
-        Path(local_dataset_dir, train_config['dataset_id'],
-             'validation').as_posix(),
-        rescale=1./255,
-        target_size=target_size,
-        batch_size=batch_size)
+        validation_generator = ImagesAndMasksGenerator(
+            Path(local_dataset_dir, train_config['dataset_id'],
+                 'validation').as_posix(),
+            rescale=1./255,
+            target_size=target_size,
+            batch_size=batch_size)
 
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
@@ -126,10 +135,10 @@ def train(gcp_bucket, config_file):
 
     results = compiled_model.fit_generator(
         train_generator,
-        steps_per_epoch=300,
+        steps_per_epoch=150,
         epochs=epochs,
         validation_data=validation_generator,
-        validation_steps=len(validation_generator),
+        validation_steps=50,
         callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
