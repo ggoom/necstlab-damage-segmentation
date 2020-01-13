@@ -8,6 +8,7 @@ import gcp_utils
 import yaml
 import git
 from gcp_utils import remote_folder_exists
+import sys
 
 
 metadata_file_name = 'metadata.yaml'
@@ -21,6 +22,7 @@ def process_zips(gcp_bucket):
     for zipped_stack in files:
         if zipped_stack == 'raw-data/':
             continue
+        sys.stdout.write(str(zipped_stack))
         process_zip(gcp_bucket, os.path.join(gcp_bucket, zipped_stack))
 
 
