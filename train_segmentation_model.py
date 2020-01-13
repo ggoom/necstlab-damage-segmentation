@@ -67,34 +67,10 @@ def train(gcp_bucket, config_file):
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
+    augmentation = train_config['data_augmentation']
+    is_necstlab = augmentation['random_90-degree_rotations']
 
-    aug_dict = dict(rotation_range=0.2,  # TODO: move to training config file
-                    width_shift_range=0.05,
-                    height_shift_range=0.05,
-                    shear_range=0.05,
-                    zoom_range=0.05,
-                    horizontal_flip=True,
-                    fill_mode='nearest')
-    if aug_dict:
-        train_generator = trainGenerator(
-            batch_size=batch_size,
-            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
-            image_folder='images',
-            mask_folder='masks',
-            aug_dict=aug_dict,
-            target_size=target_size,
-            seed=train_config['training_data_shuffle_seed'])
-
-        validation_generator = trainGenerator(
-            batch_size=batch_size,
-            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix(),
-            image_folder='images',
-            mask_folder='masks',
-            aug_dict=aug_dict,
-            target_size=target_size,
-            seed=train_config['training_data_shuffle_seed'])
-
-    else:
+    if is_necstlab:  # necstlab's workflow
         train_generator = ImagesAndMasksGenerator(
             Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
             rescale=1./255,
@@ -110,6 +86,32 @@ def train(gcp_bucket, config_file):
             rescale=1./255,
             target_size=target_size,
             batch_size=batch_size)
+    else:  # new workflow
+        bio_augmentation = augmentation['bio_augmentation']
+        augmentation_dict = dict(rotation_range=bio_augmentation['rotation_range'],
+                                 width_shift_range=bio_augmentation['width_shift_range'],
+                                 height_shift_range=bio_augmentation['height_shift_range'],
+                                 shear_range=bio_augmentation['shear_range'],
+                                 zoom_range=bio_augmentation['zoom_range'],
+                                 horizontal_flip=bio_augmentation['horizontal_flip'],
+                                 fill_mode=bio_augmentation['fill_mode'])
+        train_generator = trainGenerator(
+            batch_size=batch_size,
+            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
+            image_folder='images',
+            mask_folder='masks',
+            aug_dict=augmentation_dict,
+            target_size=target_size,
+            seed=train_config['training_data_shuffle_seed'])
+
+        validation_generator = trainGenerator(
+            batch_size=batch_size,
+            train_path=Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix(),
+            image_folder='images',
+            mask_folder='masks',
+            aug_dict=augmentation_dict,
+            target_size=target_size,
+            seed=train_config['training_data_shuffle_seed'])
 
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
@@ -135,10 +137,10 @@ def train(gcp_bucket, config_file):
 
     results = compiled_model.fit_generator(
         train_generator,
-        steps_per_epoch=150,
+        steps_per_epoch=len(train_generator) if is_necstlab else augmentation['bio_augmentation']['steps_per_epoch'],
         epochs=epochs,
         validation_data=validation_generator,
-        validation_steps=50,
+        validation_steps=len(validation_generator) if is_necstlab else augmentation['bio_augmentation']['validation_steps'],
         callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
