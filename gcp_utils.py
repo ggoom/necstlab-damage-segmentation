@@ -4,7 +4,14 @@ from google.cloud import storage
 
 
 def list_files(gcp_bucket_name, prefix):
-    gcp_key_file_location = next(Path('./keys').iterdir())
+    with Path('terraform.tfvars').open() as f:
+        line = f.readline()
+        while line:
+            if 'gcp_key_file_location' in line:
+                gcp_key_file_location = line.split('"')[1]
+            line = f.readline()
+
+    # gcp_key_file_location = next(Path('./keys').iterdir())
     storage_client = storage.Client.from_service_account_json(gcp_key_file_location)
     bucket_name = gcp_bucket_name
     bucket = storage_client.get_bucket(bucket_name)
