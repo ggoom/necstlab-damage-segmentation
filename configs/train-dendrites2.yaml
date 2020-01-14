@@ -9,7 +9,7 @@ train_config:
   loss: 'cross_entropy'
   optimizer: 'adam'
   batch_size: 2
-  epochs: 10
+  epochs: 5
   training_data_shuffle_seed: 1234
   data_augmentation:
     random_90-degree_rotations: True
@@ -21,5 +21,5 @@ train_config:
       zoom_range: 0.05
       horizontal_flip: True
       fill_mode: 'reflect'
-      steps_per_epoch: 850
+      steps_per_epoch: 851
       validation_steps: 170
