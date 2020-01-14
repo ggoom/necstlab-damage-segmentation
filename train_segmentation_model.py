@@ -67,17 +67,16 @@ def train(gcp_bucket, config_file):
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
-    augmentation = train_config['data_augmentation']
-    is_necstlab = augmentation['random_90-degree_rotations']
+    augmentation_type = train_config['data_augmentation']['augmentation_type']
 
-    if is_necstlab:  # necstlab's workflow
+    if augmentation_type == 'necstlab':  # necstlab's workflow
         train_generator = ImagesAndMasksGenerator(
             Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
             rescale=1./255,
             target_size=target_size,
             batch_size=batch_size,
             shuffle=True,
-            random_rotation=train_config['data_augmentation']['random_90-degree_rotations'],
+            random_rotation=train_config['data_augmentation']['necstlab_augmentation']['random_90-degree_rotations'],
             seed=train_config['training_data_shuffle_seed'])
 
         validation_generator = ImagesAndMasksGenerator(
@@ -86,8 +85,8 @@ def train(gcp_bucket, config_file):
             rescale=1./255,
             target_size=target_size,
             batch_size=batch_size)
-    else:  # new workflow
-        bio_augmentation = augmentation['bio_augmentation']
+    elif augmentation_type == 'bio':  # new workflow
+        bio_augmentation = train_config['data_augmentation']['bio_augmentation']
         augmentation_dict = dict(rotation_range=bio_augmentation['rotation_range'],
                                  width_shift_range=bio_augmentation['width_shift_range'],
                                  height_shift_range=bio_augmentation['height_shift_range'],
@@ -137,10 +136,10 @@ def train(gcp_bucket, config_file):
 
     results = compiled_model.fit_generator(
         train_generator,
-        steps_per_epoch=len(train_generator) if is_necstlab else augmentation['bio_augmentation']['steps_per_epoch'],
+        steps_per_epoch=len(train_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch'],
         epochs=epochs,
         validation_data=validation_generator,
-        validation_steps=len(validation_generator) if is_necstlab else augmentation['bio_augmentation']['validation_steps'],
+        validation_steps=len(validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps'],
         callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
