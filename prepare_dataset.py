@@ -384,5 +384,10 @@ if __name__ == "__main__":
         '--config-file',
         type=str,
         help='The location of the data preparation configuration file.')
+    argparser.add_argument(
+        '--annotations-or-masks',
+        type=str,
+        help='Whether ingested stacks contain annotations or masks.'
+    )
 
     prepare_dataset(**argparser.parse_args().__dict__)

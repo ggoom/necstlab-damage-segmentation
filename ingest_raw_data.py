@@ -15,7 +15,7 @@ metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
 
 
-def process_zips(gcp_bucket):
+def process_zips(gcp_bucket, annotations_or_masks):
 
     files = gcp_utils.list_files(gcp_bucket.split('gs://')[1], 'raw-data')
 
@@ -23,10 +23,10 @@ def process_zips(gcp_bucket):
         if zipped_stack == 'raw-data/':
             continue
         sys.stdout.write(str(zipped_stack))
-        process_zip(gcp_bucket, os.path.join(gcp_bucket, zipped_stack))
+        process_zip(gcp_bucket, annotations_or_masks, os.path.join(gcp_bucket, zipped_stack))
 
 
-def process_zip(gcp_bucket, zipped_stack):
+def process_zip(gcp_bucket, annotations_or_masks, zipped_stack):
 
     start_dt = datetime.now()
 
@@ -40,22 +40,23 @@ def process_zip(gcp_bucket, zipped_stack):
         pass
     tmp_directory.mkdir()
 
-    is_mask = 'masks' in zipped_stack
+    label_type = annotations_or_masks
+    is_label = label_type in zipped_stack
 
     stack_id = Path(zipped_stack).name.split('.')[0]
-    split_strings = ['_8bit', '-', '_masks']
+    split_strings = ['_8bit', '-', '_' + label_type]
     for s in split_strings:
         stack_id = stack_id.split(s)[0]
 
     stack_dir = Path(tmp_directory, stack_id)
 
-    if not is_mask and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "images"):
+    if not is_label and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "images"):
 
         print("{} has already been processed! Skipping...".format(os.path.join(stack_id, "images")))
 
-    elif is_mask and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), "masks"):
+    elif is_label and remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', stack_id), label_type):
 
-        print("{} has already been processed! Skipping...".format(os.path.join(stack_id, "masks")))
+        print("{} has already been processed! Skipping...".format(os.path.join(stack_id, label_type)))
 
     else:
 
@@ -76,7 +77,7 @@ def process_zip(gcp_bucket, zipped_stack):
                 Image.open(f).convert("L").save(f)
 
         shutil.move(unzipped_dir.as_posix(),
-                    Path(unzipped_dir.parent, 'masks' if is_mask else 'images').as_posix())
+                    Path(unzipped_dir.parent, label_type if is_label else 'images').as_posix())
 
         # get metadata file, if exists
         os.system("gsutil -m cp -r '{}' '{}'".format(os.path.join(gcp_bucket, 'processed-data/', stack_id, metadata_file_name),
@@ -88,12 +89,12 @@ def process_zip(gcp_bucket, zipped_stack):
         except FileNotFoundError:
             metadata = {}
 
-        metadata.update({'masks' if is_mask else 'images': {
+        metadata.update({label_type if is_label else 'images': {
             'gcp_bucket': gcp_bucket,
             'zipped_stack_file': zipped_stack,
             'created_datetime': datetime.now(pytz.UTC).strftime('%Y%m%dT%H%M%SZ'),
             'original_number_of_files_in_zip': original_number_of_files_in_zip,
-            'number_of_images': len(list(Path(unzipped_dir.parent, 'masks' if is_mask else 'images').iterdir())),
+            'number_of_images': len(list(Path(unzipped_dir.parent, label_type if is_label else 'images').iterdir())),
             'git_hash': git.Repo(search_parent_directories=True).head.object.hexsha},
             'elapsed_minutes': round((datetime.now() - start_dt).total_seconds() / 60, 1)
         })
@@ -124,10 +125,18 @@ if __name__ == "__main__":
         default='',
         help='The zipped stack to be processed.')
 
+    argparser.add_argument(
+        '--annotations-or-masks',
+        type=str,
+        help='Whether ingested stacks contain annotations or masks.'
+    )
+
     kw_args = argparser.parse_args().__dict__
 
     if kw_args['zipped_stack'] == '':
-        process_zips(gcp_bucket=kw_args['gcp_bucket'])
+        process_zips(gcp_bucket=kw_args['gcp_bucket'],
+                     annotations_or_masks=kw_args['annotations_or_masks'])
     else:
         process_zip(gcp_bucket=kw_args['gcp_bucket'],
+                    annotations_or_masks=kw_args['annotations_or_masks'],
                     zipped_stack=kw_args['zipped_stack'])
