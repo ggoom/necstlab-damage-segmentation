@@ -204,7 +204,8 @@ def train(gcp_bucket, config_file):
         'git_hash': git.Repo(search_parent_directories=True).head.object.hexsha,
         'original_config_filename': config_file,
         'elapsed_minutes': round((datetime.now() - start_dt).total_seconds() / 60, 1),
-        'dataset_config': dataset_config
+        'dataset_config': dataset_config,
+        'train_config': train_config
     }
 
     with Path(model_dir, metadata_file_name).open('w') as f:
