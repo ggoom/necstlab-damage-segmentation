@@ -61,7 +61,7 @@ def process_zip(gcp_bucket, annotations_or_masks, zipped_stack):
 
         os.system("gsutil -m cp -r '{}' '{}'".format(zipped_stack, tmp_directory.as_posix()))
 
-        os.system("7za x -y -o'{}' '{}'".format(stack_dir.as_posix(), Path(tmp_directory, Path(zipped_stack).name).as_posix()))
+        os.system("7za x -y -o'{}' '{}' -xr!__MACOSX".format(stack_dir.as_posix(), Path(tmp_directory, Path(zipped_stack).name).as_posix()))
         os.remove(Path(tmp_directory, Path(zipped_stack).name).as_posix())
         unzipped_dir = next(stack_dir.iterdir())
 
