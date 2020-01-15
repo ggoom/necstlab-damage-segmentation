@@ -9,10 +9,12 @@ train_config:
   loss: 'cross_entropy'
   optimizer: 'adam'
   batch_size: 2
-  epochs: 10
+  epochs: 4
   training_data_shuffle_seed: 1234
   data_augmentation:
-    random_90-degree_rotations: False
+    augmentation_type: 'necstlab' # 'necstlab' or 'bio'
+    necstlab_augmentation:
+      random_90-degree_rotations: True
     bio_augmentation:
       rotation_range: 90
       width_shift_range: 0.05
@@ -21,5 +23,5 @@ train_config:
       zoom_range: 0.05
       horizontal_flip: True
       fill_mode: 'reflect'
-      steps_per_epoch: 850
+      steps_per_epoch: 851
       validation_steps: 170
