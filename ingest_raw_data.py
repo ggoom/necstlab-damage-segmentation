@@ -22,7 +22,7 @@ def process_zips(gcp_bucket):
     for file_name in files:
         if file_name == 'raw-data/' or file_name[-4] != '.zip':
             continue
-        print("hello")
+        sys.stdout.write("hello")
         process_zip(gcp_bucket, os.path.join(gcp_bucket, file_name))
 
 
