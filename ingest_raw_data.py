@@ -20,6 +20,7 @@ def process_zips(gcp_bucket, annotations_or_masks):
     files = gcp_utils.list_files(gcp_bucket.split('gs://')[1], 'raw-data')
 
     for file_name in files:
+        sys.stdout.write(str(file_name))
         if file_name == 'raw-data/' or file_name == '.DS_Store':
             continue
         process_zip(gcp_bucket, annotations_or_masks, os.path.join(gcp_bucket, file_name))
