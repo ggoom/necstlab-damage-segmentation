@@ -19,11 +19,10 @@ def process_zips(gcp_bucket):
 
     files = gcp_utils.list_files(gcp_bucket.split('gs://')[1], 'raw-data')
 
-    for zipped_stack in files:
-        if zipped_stack == 'raw-data/':
+    for file_name in files:
+        if file_name == 'raw-data/' or file_name[-4] != '.zip':
             continue
-        sys.stdout.write(str(zipped_stack))
-        process_zip(gcp_bucket, os.path.join(gcp_bucket, zipped_stack))
+        process_zip(gcp_bucket, os.path.join(gcp_bucket, file_name))
 
 
 def process_zip(gcp_bucket, zipped_stack):
@@ -61,7 +60,7 @@ def process_zip(gcp_bucket, zipped_stack):
 
         os.system("gsutil -m cp -r '{}' '{}'".format(zipped_stack, tmp_directory.as_posix()))
 
-        os.system("7za x -y -o'{}' '{}'".format(stack_dir.as_posix(), Path(tmp_directory, Path(zipped_stack).name).as_posix()))
+        os.system("7za x -y -o'{}' '{}' -xr!__MACOSX".format(stack_dir.as_posix(), Path(tmp_directory, Path(zipped_stack).name).as_posix()))
         os.remove(Path(tmp_directory, Path(zipped_stack).name).as_posix())
         unzipped_dir = next(stack_dir.iterdir())
 
