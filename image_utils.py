@@ -164,7 +164,6 @@ class ImagesAndMasksGenerator(Sequence):
             #     masks[i, :, :, j] = np.asarray(Image.open(batch_mask_filenames[c][i]).rotate(rotation))
 
         images = images * self.rescale
-        masks = masks * self.rescale
 
         return images, masks
 
