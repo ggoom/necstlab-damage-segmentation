@@ -24,35 +24,26 @@ GV_RGB_mapping = {
     250: [0, 0, 255],  # red: 90 degree ply damage
 }
 
-custom_map = {
-    'dummy': [0, 255, 0],
-}
-
 
 def overlay_masks(images, masks):
     # assert type(images) == type(masks)
     if type(images) == np.ndarray:
         raise NotImplementedError
     else:  # assume is a file path
-        image_file, mask_file = images, masks
+        image_file = images
         image = np.asarray(Image.open(image_file).convert('RGB'))
-        mask = np.asarray(Image.open(mask_file).convert('RGB'))
-        # boolmask = mask.astype(bool)
         composite_image = image.copy()
-        # sys.stdout.write(str(composite_image.shape))
-        # sys.stdout.write(str(boolmask.shape))
-        # sys.stdout.write(str(composite_image[0, 0]))
-        # sys.stdout.write(str(boolmask[0, 0]))
-        # for i in range(512):
-        #     for j in range(512):
-        #         rgb = boolmask[i, j]
-        #         if not rgb[0] == rgb[1] == rgb[2]:
-        #             sys.stdout.write("HELLO")
-        # mask_slice = mask[:, :, 0]
-        composite_image[mask[:, :, 0] == 255] = [0, 255, 0]
-        # for c in masks:
-        #     if class_RGB_mapping[c] is not None:
-        #         composite_image[masks[c].astype(bool)] = class_RGB_mapping[c]
+
+        if type(masks) == str: #does not have classes 
+            mask_file = masks
+            mask = np.asarray(Image.open(mask_file).convert('RGB'))
+            composite_image[mask[:, :, 0] == 255] = [0, 255, 0]        
+        elif type(masks) == dict: #has classes
+            mask_files = masks
+            masks = {c: np.asarray(Image.open(mask_files[c])) for c in mask_files}
+            for c in masks:
+                if class_RGB_mapping[c] is not None:
+                    composite_image[masks[c].astype(bool)] = class_RGB_mapping[c]
 
     composite_image = Image.fromarray(composite_image)
     return composite_image
@@ -109,15 +100,19 @@ class TensorBoardImage(keras.callbacks.Callback):
 
 # adapted from: https://stanford.edu/~shervine/blog/keras-how-to-generate-data-on-the-fly
 class ImagesAndMasksGenerator(Sequence):
-    def __init__(self, dataset_directory, rescale, target_size, batch_size, shuffle=False, seed=None, random_rotation=False):
+    def __init__(self, dataset_directory, rescale, target_size, batch_size, has_classes, shuffle=False, seed=None, random_rotation=False):
         self.dataset_directory = dataset_directory
         self.image_filenames = sorted(Path(self.dataset_directory, 'images').iterdir())
-        self.mask_filenames = sorted(Path(self.dataset_directory, 'masks').iterdir())
-        # for c in sorted(Path(self.dataset_directory, 'masks').iterdir()):
-        #     self.mask_filenames[c.name] = sorted(c.iterdir())
+        if has_classes:
+            self.mask_filenames = OrderedDict()
+            for c in sorted(Path(self.dataset_directory, 'masks').iterdir()):
+                self.mask_filenames[c.name] = sorted(c.iterdir())
+        else:
+            self.mask_filenames = sorted(Path(self.dataset_directory, 'masks').iterdir())
         self.rescale = rescale
         self.target_size = target_size
         self.batch_size = batch_size
+        self.has_classes = has_classes
         self.shuffle = shuffle
         self.seed = seed
         self.random_rotation = random_rotation
@@ -135,9 +130,12 @@ class ImagesAndMasksGenerator(Sequence):
 
         # Find list of IDs
         batch_image_filenames = [self.image_filenames[k] for k in indexes]
-        batch_mask_filenames = [self.mask_filenames[k] for k in indexes]
-        # for c in self.mask_filenames:
-        #     batch_mask_filenames[c] = [self.mask_filenames[c][k] for k in indexes]
+        if self.has_classes:
+            batch_mask_filenames = {}
+            for c in self.mask_filenames:
+                batch_mask_filenames[c] = [self.mask_filenames[c][k] for k in indexes]
+        else:
+            batch_mask_filenames = [self.mask_filenames[k] for k in indexes]
 
         # Generate data
         images, masks = self.__data_generation(batch_image_filenames, batch_mask_filenames)
@@ -152,16 +150,19 @@ class ImagesAndMasksGenerator(Sequence):
 
     def __data_generation(self, batch_image_filenames, batch_mask_filenames):
         images = np.empty((self.batch_size, *self.target_size, 1))
-        masks = np.empty((self.batch_size, *self.target_size, 1))
+        masks = np.empty((self.batch_size, *self.target_size, len(self.mask_filenames) if self.has_classes else 1), dtype=int)
 
         for i in range(len(batch_image_filenames)):
             rotation = 0
             if self.random_rotation:
                 rotation = random.sample([0, 90, 180, 270], k=1)[0]
             images[i, :, :, 0] = np.asarray(Image.open(batch_image_filenames[i]).rotate(rotation))
-            masks[i, :, :, 0] = np.asarray(Image.open(batch_mask_filenames[i]).rotate(rotation))
-            # for j, c in enumerate(self.mask_filenames):
-            #     masks[i, :, :, j] = np.asarray(Image.open(batch_mask_filenames[c][i]).rotate(rotation))
+
+            if self.has_classes:
+                for j, c in enumerate(self.mask_filenames):
+                    masks[i, :, :, j] = np.asarray(Image.open(batch_mask_filenames[c][i]).rotate(rotation))
+            else:
+                masks[i, :, :, 0] = np.asarray(Image.open(batch_mask_filenames[i]).rotate(rotation))
 
         images = images * self.rescale
 
