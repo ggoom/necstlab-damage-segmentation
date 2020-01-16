@@ -43,7 +43,7 @@ def process_zip(gcp_bucket, annotations_or_masks, zipped_stack):
     is_label = label_type in zipped_stack
 
     stack_id = Path(zipped_stack).name.split('.')[0]
-    split_strings = ['_8bit', '-', '_' + label_type]
+    split_strings = ['_8bit', '-', '_dmg']
     for s in split_strings:
         stack_id = stack_id.split(s)[0]
 
