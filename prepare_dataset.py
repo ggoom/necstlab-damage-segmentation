@@ -244,24 +244,24 @@ def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, cla
                     raise ValueError("Image cropping type: {}".format(image_cropping_params['type']))
 
 
-# def create_class_masks(data_prep_local_dir, class_annotation_mapping):
-#     for scan in [p.name for p in Path(data_prep_local_dir, 'resized').iterdir()]:
-#         if 'masks' not in [p.name for p in Path(data_prep_local_dir, 'resized', scan).iterdir()]:
-#             scan_annotation_files = sorted(Path(data_prep_local_dir, 'resized', scan, 'annotations').iterdir())
-#             for c, gvs_in_c in class_annotation_mapping.items():
-#                 assert "class_" in c
-#                 assert "_annotation_GVs" in c, "'_annotation_GVs' must be in the class name to indicate these are grayvalues"
-#                 class_name = c[:-len('_annotation_GVs')]
-#                 Path(data_prep_local_dir, 'resized', scan, 'masks', class_name).mkdir(parents=True, exist_ok=True)
-#                 for scan_annotation_file in scan_annotation_files:
-#                     annotation = np.asarray(Image.open(scan_annotation_file))
-#                     mask = np.zeros(annotation.shape, dtype=bool)
-#                     for gv in gvs_in_c:
-#                         assert type(gv) is int
-#                         mask += (annotation == gv)
-#                     mask = Image.fromarray(mask.astype('uint8'))
-#                     mask.save(Path(data_prep_local_dir, 'resized', scan, 'masks',
-#                                    class_name, scan_annotation_file.name).as_posix())
+def create_class_masks(data_prep_local_dir, class_annotation_mapping):
+    for scan in [p.name for p in Path(data_prep_local_dir, 'resized').iterdir()]:
+        if 'masks' not in [p.name for p in Path(data_prep_local_dir, 'resized', scan).iterdir()]:
+            scan_annotation_files = sorted(Path(data_prep_local_dir, 'resized', scan, 'annotations').iterdir())
+            for c, gvs_in_c in class_annotation_mapping.items():
+                assert "class_" in c
+                assert "_annotation_GVs" in c, "'_annotation_GVs' must be in the class name to indicate these are grayvalues"
+                class_name = c[:-len('_annotation_GVs')]
+                Path(data_prep_local_dir, 'resized', scan, 'masks', class_name).mkdir(parents=True, exist_ok=True)
+                for scan_annotation_file in scan_annotation_files:
+                    annotation = np.asarray(Image.open(scan_annotation_file))
+                    mask = np.zeros(annotation.shape, dtype=bool)
+                    for gv in gvs_in_c:
+                        assert type(gv) is int
+                        mask += (annotation == gv)
+                    mask = Image.fromarray(mask.astype('uint8'))
+                    mask.save(Path(data_prep_local_dir, 'resized', scan, 'masks',
+                                   class_name, scan_annotation_file.name).as_posix())
 
 
 def recursive_copy_directory(src, dst):
@@ -271,23 +271,26 @@ def recursive_copy_directory(src, dst):
         shutil.copy(src, dst)
 
 
-def split_prepared_data(data_prep_local_dir, prepared_dataset_local_dir, dataset_split):
+def split_prepared_data(data_prep_local_dir, prepared_dataset_local_dir, dataset_split, label_type):
     for split, scans_in_split in dataset_split.items():
         if split not in [p.name for p in prepared_dataset_local_dir.iterdir()]:
             images_dest_dir = Path(prepared_dataset_local_dir, split, 'images')
             images_dest_dir.mkdir(parents=True)
-            mask_dest_dir = Path(prepared_dataset_local_dir, split, 'masks')
-            mask_dest_dir.mkdir(parents=True)
+            if label_type == 'masks':
+                mask_dest_dir = Path(prepared_dataset_local_dir, split, 'masks')
+                mask_dest_dir.mkdir(parents=True)
             for scan in scans_in_split:
                 for file in Path(data_prep_local_dir, 'resized', scan, 'images').iterdir():
                     shutil.copy(file.as_posix(), Path(images_dest_dir, file.name).as_posix())
-                for file in Path(data_prep_local_dir, 'resized', scan, 'masks').iterdir():
-                    shutil.copy(file.as_posix(), Path(mask_dest_dir, file.name).as_posix())
-                # for c in [p.name for p in Path(data_prep_local_dir, 'resized', scan, 'masks').iterdir()]:
-                #     mask_class_dest_dir = Path(prepared_dataset_local_dir, split, 'masks', c)
-                #     mask_class_dest_dir.mkdir(parents=True, exist_ok=True)
-                #     for file in Path(data_prep_local_dir, 'resized', scan, 'masks', c).iterdir():
-                #         shutil.copy(file.as_posix(), Path(mask_class_dest_dir, file.name).as_posix())
+                if label_type == 'masks':
+                    for file in Path(data_prep_local_dir, 'resized', scan, 'masks').iterdir():
+                        shutil.copy(file.as_posix(), Path(mask_dest_dir, file.name).as_posix())
+                elif label_type == 'annotations':
+                    for c in [p.name for p in Path(data_prep_local_dir, 'resized', scan, 'masks').iterdir()]:
+                        mask_class_dest_dir = Path(prepared_dataset_local_dir, split, 'masks', c)
+                        mask_class_dest_dir.mkdir(parents=True, exist_ok=True)
+                        for file in Path(data_prep_local_dir, 'resized', scan, 'masks', c).iterdir():
+                            shutil.copy(file.as_posix(), Path(mask_class_dest_dir, file.name).as_posix())
 
 
 def copy_dataset_to_remote_dest(prepared_dataset_location, prepared_dataset_remote_dest, dataset_id):
@@ -347,9 +350,10 @@ def prepare_dataset(gcp_bucket, config_file):
 
     resize_and_crop(data_prep_local_dir, dataset_config['target_size'], dataset_config['image_cropping'], dataset_config['class_annotation_mapping'], label_type)
 
-    # create_class_masks(data_prep_local_dir, dataset_config['class_annotation_mapping'])
+    if label_type == 'annotations':
+        create_class_masks(data_prep_local_dir, dataset_config['class_annotation_mapping'])
 
-    split_prepared_data(data_prep_local_dir, prepared_dataset_local_dir, dataset_config['dataset_split'])
+    split_prepared_data(data_prep_local_dir, prepared_dataset_local_dir, dataset_config['dataset_split'], label_type)
 
     metadata = {
         'gcp_bucket': gcp_bucket,
