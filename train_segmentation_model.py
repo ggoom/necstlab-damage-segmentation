@@ -18,12 +18,14 @@ metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
 
 
-def sample_image_and_mask_paths(generator, n_paths):
+def sample_image_and_mask_paths(generator, n_paths, has_classes):
     random.seed(0)
     rand_inds = [random.randint(0, len(generator.image_filenames)-1) for _ in range(n_paths)]
     image_paths = list(np.asarray(generator.image_filenames)[rand_inds])
-    mask_paths = list(np.asarray(generator.mask_filenames)[rand_inds])
-    # mask_paths = [{c: list(np.asarray(generator.mask_filenames[c]))[i] for c in generator.mask_filenames} for i in rand_inds]
+    if has_classes:
+        mask_paths = [{c: list(np.asarray(generator.mask_filenames[c]))[i] for c in generator.mask_filenames} for i in rand_inds]
+    else:
+        mask_paths = list(np.asarray(generator.mask_filenames)[rand_inds])
     return list(zip(image_paths, mask_paths))
 
 
@@ -64,7 +66,7 @@ def train(gcp_bucket, config_file):
     with Path(model_dir, 'config.yaml').open('w') as f:
         yaml.safe_dump({'train_config': train_config}, f)
 
-    has_classes = True if True in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else False
+    has_classes = False if True not in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else True
 
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
@@ -132,8 +134,8 @@ def train(gcp_bucket, config_file):
     callbacks = [model_checkpoint_callback, tensorboard_callback, csv_logger_callback]
     if augmentation_type == 'necstlab':
         n_sample_images = 20
-        train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
-        validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images)
+        train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images, has_classes)
+        validation_image_and_mask_paths = sample_image_and_mask_paths(validation_generator, n_sample_images, has_classes)
 
         tensorboard_image_callback = TensorBoardImage(
             log_dir=logs_dir.as_posix(),
