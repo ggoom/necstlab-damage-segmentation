@@ -1,7 +1,7 @@
 dataset_config:
   dataset_split:
     train: [
-      "dummydatatest"
+      "dummydatatrain"
     ]
     validation: [
       "dummydatavalidation",
