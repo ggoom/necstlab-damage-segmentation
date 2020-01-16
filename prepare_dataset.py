@@ -11,6 +11,7 @@ from datetime import datetime
 import pytz
 from gcp_utils import remote_folder_exists
 
+import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -336,6 +337,7 @@ def prepare_dataset(gcp_bucket, config_file):
 
     assert not remote_folder_exists(prepared_dataset_remote_dest, dataset_id)
 
+    sys.stdout.write(str([str(p) for p in Path(processed_data_local_dir).iterdir()]))
     label_type = 'masks' if 'masks' in [str(p) for p in Path(processed_data_local_dir).iterdir()] else 'annotations'
 
     copy_processed_data_locally_if_missing(all_scans, processed_data_remote_source, processed_data_local_dir)
