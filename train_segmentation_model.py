@@ -120,7 +120,7 @@ def train(gcp_bucket, config_file):
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
         train_config['segmentation_model']['model_parameters'],
-        1,
+        len(train_generator.mask_filenames) if has_classes else 1,
         train_config['loss'],
         train_config['optimizer'])
 
@@ -203,13 +203,12 @@ def train(gcp_bucket, config_file):
     metadata = {
         'gcp_bucket': gcp_bucket,
         'created_datetime': datetime.now(pytz.UTC).strftime('%Y%m%dT%H%M%SZ'),
-        'num_classes': 1,
+        'num_classes': len(train_generator.mask_filenames) if has_classes else 1,
         'target_size': target_size,
         'git_hash': git.Repo(search_parent_directories=True).head.object.hexsha,
         'original_config_filename': config_file,
         'elapsed_minutes': round((datetime.now() - start_dt).total_seconds() / 60, 1),
         'dataset_config': dataset_config,
-        'train_config': train_config
     }
 
     with Path(model_dir, metadata_file_name).open('w') as f:
