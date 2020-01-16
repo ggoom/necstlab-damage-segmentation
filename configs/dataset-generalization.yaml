@@ -4,7 +4,7 @@ dataset_config:
       "dummydatatest"
     ]
     validation: [
-      "dummydatavalid",
+      "dummydatavalidation",
     ]
     test: [
       "dummydatatest",
