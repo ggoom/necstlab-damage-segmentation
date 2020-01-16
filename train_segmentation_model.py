@@ -128,7 +128,8 @@ def train(gcp_bucket, config_file):
                                                 monitor='loss', verbose=1, save_best_only=True)
     tensorboard_callback = TensorBoard(log_dir=logs_dir.as_posix(), batch_size=batch_size, write_graph=True,
                                        write_grads=False, write_images=True, update_freq='epoch')
-
+    csv_logger_callback = CSVLogger(Path(model_dir, 'metrics.csv').as_posix(), append=True)
+    callbacks = [model_checkpoint_callback, tensorboard_callback, csv_logger_callback]
     if augmentation_type == 'necstlab':
         n_sample_images = 20
         train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
@@ -137,8 +138,7 @@ def train(gcp_bucket, config_file):
         tensorboard_image_callback = TensorBoardImage(
             log_dir=logs_dir.as_posix(),
             images_and_masks_paths=train_image_and_mask_paths + validation_image_and_mask_paths)
-
-    csv_logger_callback = CSVLogger(Path(model_dir, 'metrics.csv').as_posix(), append=True)
+        callbacks.append(tensorboard_image_callback)
 
     results = compiled_model.fit_generator(
         train_generator,
@@ -146,7 +146,7 @@ def train(gcp_bucket, config_file):
         epochs=epochs,
         validation_data=validation_generator,
         validation_steps=len(validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps'],
-        callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback, tensorboard_image_callback if augmentation_type == 'necstlab' else None])
+        callbacks=callbacks)
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
 
