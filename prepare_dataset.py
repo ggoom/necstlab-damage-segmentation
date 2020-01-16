@@ -339,8 +339,8 @@ def prepare_dataset(gcp_bucket, config_file):
 
     copy_processed_data_locally_if_missing(all_scans, processed_data_remote_source, processed_data_local_dir)
 
-    sys.stdout.write(str([str(p) for p in Path(processed_data_local_dir).iterdir()]))
-    label_type = 'masks' if 'masks' in [str(p) for p in Path(processed_data_local_dir).iterdir()] else 'annotations'
+    label_type = 'masks' if True in [remote_folder_exists(os.path.join(gcp_bucket, 'processed-data', scan), 'masks') for scan in all_scans] else 'annotations'
+    sys.stdout.write(label_type)
 
     copy_and_downsample_processed_data_to_preparation_if_missing(
         all_scans, processed_data_local_dir, data_prep_local_dir, dataset_config['stack_downsampling'], label_type)
