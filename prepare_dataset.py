@@ -27,14 +27,14 @@ def copy_processed_data_locally_if_missing(scans, processed_data_remote_source, 
 
 
 def copy_and_downsample_processed_data_to_preparation_if_missing(scans, processed_data_local_dir,
-                                                                 data_prep_local_dir, downsampling_params):
+                                                                 data_prep_local_dir, downsampling_params, label_type):
     Path(data_prep_local_dir, 'downsampled').mkdir(parents=True, exist_ok=True)
     assert 'type' in downsampling_params
     for scan in scans:
         if scan not in [p.name for p in Path(data_prep_local_dir, 'downsampled').iterdir()]:
             scan_image_files = sorted(Path(processed_data_local_dir, scan, 'images').iterdir())
-            scan_mask_files = sorted(Path(processed_data_local_dir, scan, 'masks').iterdir())
-            assert len(scan_image_files) == len(scan_mask_files)
+            scan_label_files = sorted(Path(processed_data_local_dir, scan, label_type).iterdir())
+            assert len(scan_image_files) == len(scan_label_files)
             assert 'num_skip_beg_slices' in downsampling_params
             assert 'num_skip_end_slices' in downsampling_params
             assert len(scan_image_files) > (downsampling_params['num_skip_beg_slices']
@@ -76,13 +76,13 @@ def copy_and_downsample_processed_data_to_preparation_if_missing(scans, processe
                 raise ValueError("Unknown downsampling type: {}".format(downsampling_params['type']))
 
             Path(data_prep_local_dir, 'downsampled', scan, 'images').mkdir(parents=True)
-            Path(data_prep_local_dir, 'downsampled', scan, 'masks').mkdir(parents=True)
+            Path(data_prep_local_dir, 'downsampled', scan, label_type).mkdir(parents=True)
             for image_ind in file_inds_to_copy:
                 shutil.copy(scan_image_files[image_ind].as_posix(),
                             Path(data_prep_local_dir, 'downsampled', scan, 'images', scan_image_files[
                                 image_ind].name).as_posix())
-                shutil.copy(scan_mask_files[image_ind].as_posix(),
-                            Path(data_prep_local_dir, 'downsampled', scan, 'masks', scan_mask_files[
+                shutil.copy(scan_label_files[image_ind].as_posix(),
+                            Path(data_prep_local_dir, 'downsampled', scan, label_type, scan_label_files[
                                 image_ind].name).as_posix())
 
 
@@ -99,7 +99,7 @@ def random_crop(img, mask, width, height):
     return img, mask
 
 
-def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, class_annotation_mapping):
+def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, class_annotation_mapping, label_type):
     Path(data_prep_local_dir, 'resized').mkdir(parents=True, exist_ok=True)
     assert 'type' in image_cropping_params
     assert target_size[0] > 0
@@ -107,69 +107,69 @@ def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, cla
     for scan in [p.name for p in Path(data_prep_local_dir, 'downsampled').iterdir()]:
         if scan not in [p.name for p in Path(data_prep_local_dir, 'resized').iterdir()]:
             scan_image_files = sorted(Path(data_prep_local_dir, 'downsampled', scan, 'images').iterdir())
-            scan_mask_files = sorted(Path(data_prep_local_dir, 'downsampled', scan, 'masks').iterdir())
-            assert len(scan_image_files) == len(scan_mask_files)
+            scan_label_files = sorted(Path(data_prep_local_dir, 'downsampled', scan, label_type).iterdir())
+            assert len(scan_image_files) == len(scan_label_files)
             Path(data_prep_local_dir, 'resized', scan, 'images').mkdir(parents=True)
-            Path(data_prep_local_dir, 'resized', scan, 'masks').mkdir(parents=True)
+            Path(data_prep_local_dir, 'resized', scan, label_type).mkdir(parents=True)
             for image_ind in range(len(scan_image_files)):
                 image = Image.open(scan_image_files[image_ind])
-                mask = Image.open(scan_mask_files[image_ind])
+                label = Image.open(scan_label_files[image_ind])
                 if image_cropping_params['type'] == 'None':
                     image.thumbnail(target_size)
-                    mask.thumbnail(target_size)
+                    label.thumbnail(target_size)
                     image.save(Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
                         image_ind].name).as_posix())
-                    mask.save(Path(data_prep_local_dir, 'resized', scan, 'masks', scan_mask_files[
+                    label.save(Path(data_prep_local_dir, 'resized', scan, label_type, scan_label_files[
                         image_ind].name).as_posix())
                 elif image_cropping_params['type'] == 'random':
                     assert 'num_per_image' in image_cropping_params
                     assert image_cropping_params['num_per_image'] > 0
                     assert image_cropping_params['num_per_image'] <= max_num_crop_per_img
                     for counter_crop in range(image_cropping_params['num_per_image']):
-                        image_crop, mask_crop = random_crop(np.asarray(image), np.asarray(mask), target_size[0], target_size[1])
+                        image_crop, label_crop = random_crop(np.asarray(image), np.asarray(label), target_size[0], target_size[1])
                         image_crop = Image.fromarray(image_crop)
-                        mask_crop = Image.fromarray(mask_crop)
+                        label_crop = Image.fromarray(label_crop)
                         image_crop.save((Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
                             image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
-                        mask_crop.save((Path(data_prep_local_dir, 'resized', scan, 'masks', scan_mask_files[
+                        label_crop.save((Path(data_prep_local_dir, 'resized', scan, label_type, scan_label_files[
                             image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
-                # elif image_cropping_params['type'] == 'linear':  # do not train with pad, some overlap okay (still aug'd)
-                #     assert 'num_per_image' in image_cropping_params
-                #     assert image_cropping_params['num_per_image'] > 0
-                #     assert image_cropping_params['num_per_image'] <= max_num_crop_per_img
-                #     img = np.asarray(image)
-                #     mask = np.asarray(annotation)
-                #     num_tiles_hor = np.int(np.ceil(img.shape[1] / target_size[0]))
-                #     num_tiles_ver = np.int(np.ceil(img.shape[0] / target_size[1]))
-                #     horiz_counter = 0  # gets reset (cyclic)
-                #     vert_counter = 0  # does not get reset (not cyclic)
-                #     for counter_crop in range(image_cropping_params['num_per_image']):  # L to R, then move down by trgt
-                #         if horiz_counter < (num_tiles_hor - 1):
-                #             x_crop_lhs = horiz_counter * target_size[0]
-                #         elif horiz_counter == (num_tiles_hor - 1):
-                #             x_crop_lhs = img.shape[1] - target_size[0]
-                #         if vert_counter < (num_tiles_ver - 1):
-                #             y_crop_top = vert_counter * target_size[1]
-                #         elif vert_counter == (num_tiles_ver - 1):
-                #             y_crop_top = img.shape[0] - target_size[1]
-                #         image_crop = img[y_crop_top:y_crop_top+target_size[1], x_crop_lhs:x_crop_lhs+target_size[0]]
-                #         annotation_crop = mask[y_crop_top:y_crop_top+target_size[1], x_crop_lhs:x_crop_lhs+target_size[0]]
-                #         image_crop = Image.fromarray(image_crop)
-                #         annotation_crop = Image.fromarray(annotation_crop)
-                #         image_crop.save((Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
-                #             image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
-                #         annotation_crop.save(
-                #             (Path(data_prep_local_dir, 'resized', scan, 'annotations', scan_annotation_files[
-                #                 image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
-                #         if horiz_counter == (num_tiles_hor - 1):  # reached rhs of img, move back to lhs & down by trgt
-                #             horiz_counter = 0
-                #             vert_counter += 1
-                #             if vert_counter > (num_tiles_ver - 1):
-                #                 break  # regardless of num crops input, the bot rhs of img has been reached
-                #         else:
-                #             horiz_counter += 1
-                #         assert horiz_counter < num_tiles_hor  # prevent movement off image
-                #         assert vert_counter < num_tiles_ver   # prevent movement off image
+                elif image_cropping_params['type'] == 'linear':  # do not train with pad, some overlap okay (still aug'd)
+                    assert 'num_per_image' in image_cropping_params
+                    assert image_cropping_params['num_per_image'] > 0
+                    assert image_cropping_params['num_per_image'] <= max_num_crop_per_img
+                    img = np.asarray(image)
+                    mask = np.asarray(annotation)
+                    num_tiles_hor = np.int(np.ceil(img.shape[1] / target_size[0]))
+                    num_tiles_ver = np.int(np.ceil(img.shape[0] / target_size[1]))
+                    horiz_counter = 0  # gets reset (cyclic)
+                    vert_counter = 0  # does not get reset (not cyclic)
+                    for counter_crop in range(image_cropping_params['num_per_image']):  # L to R, then move down by trgt
+                        if horiz_counter < (num_tiles_hor - 1):
+                            x_crop_lhs = horiz_counter * target_size[0]
+                        elif horiz_counter == (num_tiles_hor - 1):
+                            x_crop_lhs = img.shape[1] - target_size[0]
+                        if vert_counter < (num_tiles_ver - 1):
+                            y_crop_top = vert_counter * target_size[1]
+                        elif vert_counter == (num_tiles_ver - 1):
+                            y_crop_top = img.shape[0] - target_size[1]
+                        image_crop = img[y_crop_top:y_crop_top+target_size[1], x_crop_lhs:x_crop_lhs+target_size[0]]
+                        annotation_crop = mask[y_crop_top:y_crop_top+target_size[1], x_crop_lhs:x_crop_lhs+target_size[0]]
+                        image_crop = Image.fromarray(image_crop)
+                        annotation_crop = Image.fromarray(annotation_crop)
+                        image_crop.save((Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
+                            image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
+                        annotation_crop.save(
+                            (Path(data_prep_local_dir, 'resized', scan, 'annotations', scan_annotation_files[
+                                image_ind].name).as_posix()).replace('.', ('_crop' + str(counter_crop) + '.')))
+                        if horiz_counter == (num_tiles_hor - 1):  # reached rhs of img, move back to lhs & down by trgt
+                            horiz_counter = 0
+                            vert_counter += 1
+                            if vert_counter > (num_tiles_ver - 1):
+                                break  # regardless of num crops input, the bot rhs of img has been reached
+                        else:
+                            horiz_counter += 1
+                        assert horiz_counter < num_tiles_hor  # prevent movement off image
+                        assert vert_counter < num_tiles_ver   # prevent movement off image
                 # elif image_cropping_params['type'] == 'all':  # do not train with pad, some overlap okay (still aug'd)
                 #     img = np.asarray(image)
                 #     mask = np.asarray(annotation)
@@ -336,12 +336,14 @@ def prepare_dataset(gcp_bucket, config_file):
 
     assert not remote_folder_exists(prepared_dataset_remote_dest, dataset_id)
 
+    label_type = 'masks' if 'masks' in [str(p) for p in Path(processed_data_local_dir).iterdir()] else 'annotations'
+
     copy_processed_data_locally_if_missing(all_scans, processed_data_remote_source, processed_data_local_dir)
 
     copy_and_downsample_processed_data_to_preparation_if_missing(
-        all_scans, processed_data_local_dir, data_prep_local_dir, dataset_config['stack_downsampling'])
+        all_scans, processed_data_local_dir, data_prep_local_dir, dataset_config['stack_downsampling'], label_type)
 
-    resize_and_crop(data_prep_local_dir, dataset_config['target_size'], dataset_config['image_cropping'], dataset_config['class_annotation_mapping'])
+    resize_and_crop(data_prep_local_dir, dataset_config['target_size'], dataset_config['image_cropping'], dataset_config['class_annotation_mapping'], label_type)
 
     # create_class_masks(data_prep_local_dir, dataset_config['class_annotation_mapping'])
 
