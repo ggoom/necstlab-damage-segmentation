@@ -14,7 +14,7 @@ train_config:
   data_augmentation:
     augmentation_type: 'necstlab' # 'necstlab' or 'bio'
     necstlab_augmentation:
-      random_90-degree_rotations: True
+      random_90-degree_rotations: False
     bio_augmentation:
       rotation_range: 90
       width_shift_range: 0.05
