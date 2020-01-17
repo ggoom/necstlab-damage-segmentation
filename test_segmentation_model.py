@@ -9,7 +9,6 @@ from gcp_utils import copy_folder_locally_if_missing
 from image_utils import ImagesAndMasksGenerator
 from models import generate_compiled_segmentation_model
 
-import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -45,23 +44,25 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
     with Path(local_model_dir, model_id, 'config.yaml').open('r') as f:
         train_config = yaml.safe_load(f)['train_config']
 
+    has_classes = False if True not in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else True
+
     target_size = dataset_config['target_size']
 
     test_generator = ImagesAndMasksGenerator(
         Path(local_dataset_dir, dataset_id, 'test').as_posix(),
         rescale=1./255,
         target_size=target_size,
-        batch_size=batch_size)
+        batch_size=batch_size,
+        has_classes=has_classes)
 
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
         train_config['segmentation_model']['model_parameters'],
-        1,
+        len(test_generator.mask_filenames) if has_classes else 1,
         train_config['loss'],
         train_config['optimizer'],
         Path(local_model_dir, model_id, "model.hdf5").as_posix())
 
-    sys.stdout.write(str(compiled_model.summary()))
     results = compiled_model.evaluate_generator(test_generator, verbose=1)
 
     metric_names = [compiled_model.loss.__name__] + [m.name for m in compiled_model.metrics]
