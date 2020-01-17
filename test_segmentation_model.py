@@ -9,7 +9,6 @@ from gcp_utils import copy_folder_locally_if_missing
 from image_utils import ImagesAndMasksGenerator
 from models import generate_compiled_segmentation_model
 
-import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -45,7 +44,6 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
     with Path(local_model_dir, model_id, 'config.yaml').open('r') as f:
         train_config = yaml.safe_load(f)['train_config']
 
-    sys.stdout.write(str([p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()]))
     has_classes = False if True not in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else True
 
     target_size = dataset_config['target_size']
