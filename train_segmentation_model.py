@@ -13,8 +13,6 @@ import git
 from gcp_utils import copy_folder_locally_if_missing
 from models import generate_compiled_segmentation_model
 
-import sys
-
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -68,8 +66,7 @@ def train(gcp_bucket, config_file):
     with Path(model_dir, 'config.yaml').open('w') as f:
         yaml.safe_dump({'train_config': train_config}, f)
 
-    sys.stdout.write(str([p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()]))
-    has_classes = True if True in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else True
+    has_classes = True if True in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else False
 
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
