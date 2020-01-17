@@ -58,7 +58,7 @@ def prepare_image(image, target_size_1d):
     return tiles
 
 
-def overlay_predictions(prepared_tiles, preds, prediction_threshold):
+def overlay_predictions(prepared_tiles, preds, prediction_threshold, has_classes):
     prediction_tiles = []
     for i in range(len(prepared_tiles)):
         prediction_tiles.append([])
@@ -67,14 +67,18 @@ def overlay_predictions(prepared_tiles, preds, prediction_threshold):
             prediction_tiles[i][j] = (prediction_tiles[i][j] * 255).astype(int)
 
             above_threshold_mask = preds[i][j].max(axis=2) >= prediction_threshold
-            best_class_by_pixel = preds[i][j].argmax(axis=2)
-            for class_i in range(preds[i][j].shape[-1]):
-                above_threshold_and_best_class = above_threshold_mask & (best_class_by_pixel == class_i)
-                prediction_tiles[i][j][above_threshold_and_best_class] = class_colors[class_i % len(class_colors)]
+            if has_classes:
+                best_class_by_pixel = preds[i][j].argmax(axis=2)
+                for class_i in range(preds[i][j].shape[-1]):
+                    above_threshold_and_best_class = above_threshold_mask & (best_class_by_pixel == class_i)
+                    prediction_tiles[i][j][above_threshold_and_best_class] = class_colors[class_i % len(class_colors)]
+            else:
+                prediction_tiles[i][j][above_threshold_mask] = [0, 255, 0]
+
     return prediction_tiles
 
 
-def segment_image(model, image, prediction_threshold, target_size_1d):
+def segment_image(model, image, prediction_threshold, target_size_1d, has_classes):
     prepared_tiles = prepare_image(image, target_size_1d)
 
     preds = []
@@ -83,7 +87,7 @@ def segment_image(model, image, prediction_threshold, target_size_1d):
         for j in range(len(prepared_tiles[i])):
             preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_1d, target_size_1d, 1))[0, :, :, :])
 
-    pred_tiles = overlay_predictions(prepared_tiles, preds, prediction_threshold)
+    pred_tiles = overlay_predictions(prepared_tiles, preds, prediction_threshold, has_classes)
     stitched_pred = stitch_preds_together(pred_tiles, target_size_1d)
     return stitched_pred
 
@@ -126,6 +130,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
     assert model_metadata['target_size'][0] == model_metadata['target_size'][1]
     target_size_1d = model_metadata['target_size'][0]
     num_classes = model_metadata['num_classes']
+    has_classes = True if num_classes > 1 else False
 
     compiled_model = generate_compiled_segmentation_model(
         train_config['segmentation_model']['model_name'],
@@ -142,7 +147,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         image = Image.open(image_file)
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
+        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d, has_classes)
 
         segmented_image.save(Path(output_dir, image_file.name).as_posix())
 

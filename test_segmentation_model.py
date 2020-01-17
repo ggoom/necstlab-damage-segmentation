@@ -44,7 +44,7 @@ def test(gcp_bucket, dataset_id, model_id, batch_size):
     with Path(local_model_dir, model_id, 'config.yaml').open('r') as f:
         train_config = yaml.safe_load(f)['train_config']
 
-    has_classes = False if True not in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else True
+    has_classes = True if True in [p.is_dir() for p in Path(local_dataset_dir, train_config['dataset_id'], 'train', 'masks').iterdir()] else False
 
     target_size = dataset_config['target_size']
 
