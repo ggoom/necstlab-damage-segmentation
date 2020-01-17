@@ -8,7 +8,6 @@ import keras
 from keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
 import io
-import sys
 
 
 class_RGB_mapping = {

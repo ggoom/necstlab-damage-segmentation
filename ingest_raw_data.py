@@ -8,7 +8,6 @@ import gcp_utils
 import yaml
 import git
 from gcp_utils import remote_folder_exists
-import sys
 
 
 metadata_file_name = 'metadata.yaml'
