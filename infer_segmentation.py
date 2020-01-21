@@ -60,6 +60,8 @@ def prepare_image(image, target_size_w, target_size_h):
     for i in range(padded_image.shape[1] // target_size_w):
         tiles.append([])
         for j in range(padded_image.shape[0] // target_size_h):
+            sys.stdout.write(str(target_size_w))
+            sys.stdout.write(str(target_size_h))
             tiles[i].append(padded_image[i*target_size_w:(i+1)*target_size_w, j*target_size_h:(j+1)*target_size_h].copy())
 
     # scale the images to be between 0 and 1
