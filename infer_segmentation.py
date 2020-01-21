@@ -55,6 +55,7 @@ def prepare_image(image, target_size_w, target_size_h):
 
     # break into 512x512 tiles
     padded_image = np.asarray(padded_image)
+    sys.stdout.write(str(padded_image.shape))
     tiles = []
     for i in range(padded_image.shape[0] // target_size_w):
         tiles.append([])
