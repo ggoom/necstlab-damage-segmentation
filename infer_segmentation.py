@@ -26,6 +26,9 @@ class_colors = [
 def stitch_preds_together(tiles, target_size_w, target_size_h):
     n_tile_rows = len(tiles)
     n_tile_cols = len(tiles[0])
+    sys.stdout.write('*****stitch: ')
+    sys.stdout.write(str(n_tile_rows))
+    sys.stdout.write(str(n_tile_cols))
     stitched_array = np.zeros((target_size_w * n_tile_rows, target_size_h * n_tile_cols, 3))
     for i in range(n_tile_rows):
         for j in range(n_tile_cols):
@@ -93,8 +96,8 @@ def segment_image(model, image, prediction_threshold, target_size_w, target_size
             preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_w, target_size_h, 1))[0, :, :, :])
 
     pred_tiles = overlay_predictions(prepared_tiles, preds, prediction_threshold)
-    # stitched_pred = stitch_preds_together(pred_tiles, target_size_w, target_size_h)
-    return pred_tiles
+    stitched_pred = stitch_preds_together(pred_tiles, target_size_w, target_size_h)
+    return stitched_pred
 
 
 def main(gcp_bucket, stack_id, model_id, prediction_threshold):
