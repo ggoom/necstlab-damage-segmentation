@@ -52,7 +52,7 @@ def prepare_image(image, target_size_w, target_size_h):
     sys.stdout.write(str(delta_h))
 
     padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
-
+    sys.stdout.write(str(padded_image.size))
     # break into 512x512 tiles
     padded_image = np.asarray(padded_image)
     sys.stdout.write(str(padded_image.shape))
