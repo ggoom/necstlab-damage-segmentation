@@ -145,7 +145,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         image = Image.open(image_file)
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_w, target_size_h)
+        segmented_image = segment_image(compiled_model, image, prediction_threshold, 640, 640)
 
         segmented_image.save(Path(output_dir, image_file.name).as_posix())
 
