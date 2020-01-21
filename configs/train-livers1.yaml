@@ -12,7 +12,9 @@ train_config:
   epochs: 5
   training_data_shuffle_seed: 1234
   data_augmentation:
-    random_90-degree_rotations: False
+    augmentation_type: 'bio' # 'necstlab' or 'bio'
+    necstlab_augmentation:
+      random_90-degree_rotations: False
     bio_augmentation:
       rotation_range: 0.2
       width_shift_range: 0.05
@@ -20,6 +22,6 @@ train_config:
       shear_range: 0.05
       zoom_range: 0.05
       horizontal_flip: True
-      fill_mode: 'nearest'
+      fill_mode: 'reflect'
       steps_per_epoch: 100
       validation_steps: 50
