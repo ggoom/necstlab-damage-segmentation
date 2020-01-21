@@ -125,7 +125,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
         model_metadata = yaml.safe_load(f)
 
     image_folder = Path(local_processed_data_dir, 'images')
-    assert model_metadata['target_size'][0] == model_metadata['target_size'][1]
+    # assert model_metadata['target_size'][0] == model_metadata['target_size'][1]
     target_size_w = model_metadata['target_size'][0]
     target_size_h = model_metadata['target_size'][1]
     num_classes = model_metadata['num_classes']
