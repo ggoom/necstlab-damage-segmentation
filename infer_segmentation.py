@@ -23,33 +23,34 @@ class_colors = [
 ]
 
 
-def stitch_preds_together(tiles, target_size_1d):
+def stitch_preds_together(tiles, target_size_w, target_size_h):
     n_tile_rows = len(tiles)
     n_tile_cols = len(tiles[0])
-    stitched_array = np.zeros((target_size_1d * n_tile_rows, target_size_1d * n_tile_cols, 3))
+    stitched_array = np.zeros((target_size_w * n_tile_rows, target_size_h * n_tile_cols, 3))
     for i in range(n_tile_rows):
         for j in range(n_tile_cols):
-            stitched_array[i*target_size_1d:(i+1)*target_size_1d, j*target_size_1d:(j+1)*target_size_1d, :] = tiles[i][j]
+            stitched_array[i*target_size_w:(i+1)*target_size_w, j*target_size_h:(j+1)*target_size_h, :] = tiles[i][j]
 
     stitched_image = Image.fromarray(stitched_array.astype('uint8'))
     return stitched_image
 
 
-def prepare_image(image, target_size_1d):
+def prepare_image(image, target_size_w, target_size_h):
     # make the image an event multiple of 512x512
-    desired_size = target_size_1d * np.ceil(np.asarray(image.size) / target_size_1d).astype(int)
-    delta_w = desired_size[0] - image.size[0]
-    delta_h = desired_size[1] - image.size[1]
+    desired_size_w = target_size_w * np.ceil(np.asarray(image.size) / target_size_w).astype(int)
+    desired_size_h = target_size_h * np.ceil(np.asarray(image.size) / target_size_h).astype(int)
+    delta_w = desired_size_w[0] - image.size[0]
+    delta_h = desired_size_h[1] - image.size[1]
     padding = (delta_w // 2, delta_h // 2, delta_w - (delta_w // 2), delta_h - (delta_h // 2))
     padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
 
     # break into 512x512 tiles
     padded_image = np.asarray(padded_image)
     tiles = []
-    for i in range(padded_image.shape[0] // target_size_1d):
+    for i in range(padded_image.shape[0] // target_size_w):
         tiles.append([])
-        for j in range(padded_image.shape[1] // target_size_1d):
-            tiles[i].append(padded_image[i*target_size_1d:(i+1)*target_size_1d, j*target_size_1d:(j+1)*target_size_1d].copy())
+        for j in range(padded_image.shape[1] // target_size_h):
+            tiles[i].append(padded_image[i*target_size_w:(i+1)*target_size_w, j*target_size_h:(j+1)*target_size_h].copy())
 
     # scale the images to be between 0 and 1
     for i in range(len(tiles)):
@@ -75,17 +76,17 @@ def overlay_predictions(prepared_tiles, preds, prediction_threshold):
     return prediction_tiles
 
 
-def segment_image(model, image, prediction_threshold, target_size_1d):
-    prepared_tiles = prepare_image(image, target_size_1d)
+def segment_image(model, image, prediction_threshold, target_size_w, target_size_h):
+    prepared_tiles = prepare_image(image, target_size_w, target_size_h)
 
     preds = []
     for i in range(len(prepared_tiles)):
         preds.append([])
         for j in range(len(prepared_tiles[i])):
-            preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_1d, target_size_1d, 1))[0, :, :, :])
+            preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_w, target_size_h, 1))[0, :, :, :])
 
     pred_tiles = overlay_predictions(prepared_tiles, preds, prediction_threshold)
-    stitched_pred = stitch_preds_together(pred_tiles, target_size_1d)
+    stitched_pred = stitch_preds_together(pred_tiles, target_size_w, target_size_h)
     return stitched_pred
 
 
@@ -125,7 +126,8 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
     image_folder = Path(local_processed_data_dir, 'images')
     assert model_metadata['target_size'][0] == model_metadata['target_size'][1]
-    target_size_1d = model_metadata['target_size'][0]
+    target_size_w = model_metadata['target_size'][0]
+    target_size_h = model_metadata['target_size'][1]
     num_classes = model_metadata['num_classes']
 
     compiled_model = generate_compiled_segmentation_model(
@@ -143,7 +145,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         image = Image.open(image_file)
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
+        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_w, target_size_h)
 
         segmented_image.save(Path(output_dir, image_file.name).as_posix())
 
