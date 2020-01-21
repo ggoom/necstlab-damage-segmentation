@@ -8,7 +8,7 @@ from PIL import Image, ImageOps
 from pathlib import Path
 import git
 from models import generate_compiled_segmentation_model
-
+import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -42,6 +42,12 @@ def prepare_image(image, target_size_w, target_size_h):
     delta_w = desired_size_w[0] - image.size[0]
     delta_h = desired_size_h[1] - image.size[1]
     padding = (delta_w // 2, delta_h // 2, delta_w - (delta_w // 2), delta_h - (delta_h // 2))
+    sys.stdout.write('*****prepare_image: ')
+    sys.stdout.write(str(desired_size_w))
+    sys.stdout.write(str(desired_size_h))
+    sys.stdout.write(str(delta_w))
+    sys.stdout.write(str(delta_h))
+
     padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
 
     # break into 512x512 tiles
@@ -56,6 +62,7 @@ def prepare_image(image, target_size_w, target_size_h):
     for i in range(len(tiles)):
         for j in range(len(tiles[i])):
             tiles[i][j] = tiles[i][j] * 1./255
+    sys.stdout.write(strlen((tiles)))
     return tiles
 
 
@@ -145,7 +152,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         image = Image.open(image_file)
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, 640, 640)
+        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_w, target_size_h)
 
         segmented_image.save(Path(output_dir, image_file.name).as_posix())
 
