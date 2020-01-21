@@ -54,7 +54,7 @@ def prepare_image(image, target_size_w, target_size_h):
     padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
     sys.stdout.write(str(padded_image.size))
     # break into 512x512 tiles
-    padded_image = np.asarray(padded_image)
+    padded_image = np.asarray(padded_image).T
     sys.stdout.write(str(padded_image.shape))
     tiles = []
     for i in range(padded_image.shape[1] // target_size_w):
@@ -62,7 +62,7 @@ def prepare_image(image, target_size_w, target_size_h):
         for j in range(padded_image.shape[0] // target_size_h):
             sys.stdout.write(str(target_size_w))
             sys.stdout.write(str(target_size_h))
-            tiles[i].append(padded_image[i*target_size_h:(i+1)*target_size_h, j*target_size_w:(j+1)*target_size_w].copy())
+            tiles[i].append(padded_image[i*target_size_w:(i+1)*target_size_w, j*target_size_h:(j+1)*target_size_h].copy())
             sys.stdout.write(str(tiles[i][j].shape))
     # scale the images to be between 0 and 1
     for i in range(len(tiles)):
