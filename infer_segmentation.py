@@ -62,7 +62,7 @@ def prepare_image(image, target_size_w, target_size_h):
     for i in range(len(tiles)):
         for j in range(len(tiles[i])):
             tiles[i][j] = tiles[i][j] * 1./255
-    sys.stdout.write(str(len(tiles)) + " " + str(len(tiles[0]))
+    sys.stdout.write(str(len(tiles)) + " " + str(len(tiles[0])))
     return tiles
 
 
