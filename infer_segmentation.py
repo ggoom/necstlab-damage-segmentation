@@ -98,7 +98,7 @@ def segment_image(model, image, prediction_threshold, target_size_w, target_size
         for j in range(len(prepared_tiles[i])):
             sys.stdout.write(' *****segment: ')
             sys.stdout.write(str(prepared_tiles[i][j].shape))
-            preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_w, target_size_h, 1))[0, :, :, :])
+            preds[i].append(model.predict(prepared_tiles[i][j].reshape(1, target_size_h, target_size_w, 1))[0, :, :, :])
 
     pred_tiles = overlay_predictions(prepared_tiles, preds, prediction_threshold)
     stitched_pred = stitch_preds_together(pred_tiles, target_size_w, target_size_h)
