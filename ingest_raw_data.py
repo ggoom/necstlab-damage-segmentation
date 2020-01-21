@@ -67,7 +67,7 @@ def process_zip(gcp_bucket, zipped_stack):
         original_number_of_files_in_zip = len(list(unzipped_dir.iterdir()))
 
         for f in Path(unzipped_dir).iterdir():
-            if f.name[-4:] != '.tif' and f.name[-4:] != '.png':
+            if f.name[-4:] != '.tif' and f.name[-4:] != '.png' and f.name[-5:] != '.tiff':
                 # remove any non-image files
                 os.remove(f.as_posix())
             else:
