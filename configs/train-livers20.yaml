@@ -1,0 +1,27 @@
+train_config:
+  model_id_prefix: 'segmentation-model-small'
+  dataset_id: 'dataset-livers20'
+  segmentation_model:
+    model_name: 'Unet'
+    model_parameters:
+      backbone_name: 'vgg16'
+      encoder_weights: Null
+  loss: 'cross_entropy'
+  optimizer: 'adam'
+  batch_size: 2
+  epochs: 5
+  training_data_shuffle_seed: 1234
+  data_augmentation:
+    augmentation_type: 'bio' # 'necstlab' or 'bio'
+    necstlab_augmentation:
+      random_90-degree_rotations: False
+    bio_augmentation:
+      rotation_range: 0.2
+      width_shift_range: 0.05
+      height_shift_range: 0.05
+      shear_range: 0.05
+      zoom_range: 0.05
+      horizontal_flip: True
+      fill_mode: 'reflect'
+      steps_per_epoch: 200
+      validation_steps: 50
