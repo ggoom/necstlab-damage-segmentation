@@ -41,7 +41,8 @@ def prepare_image(image, target_size_1d):
     delta_w = desired_size[0] - image.size[0]
     delta_h = desired_size[1] - image.size[1]
     padding = (delta_w // 2, delta_h // 2, delta_w - (delta_w // 2), delta_h - (delta_h // 2))
-    padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
+    # padded_image = ImageOps.expand(image, padding, fill=int(np.asarray(image).mean()))
+    padded_image = ImageOps.expand(image, padding, fill=0)
 
     # break into 512x512 tiles
     padded_image = np.asarray(padded_image)
