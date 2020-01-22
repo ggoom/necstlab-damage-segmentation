@@ -125,7 +125,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
     image_folder = Path(local_processed_data_dir, 'images')
     assert model_metadata['target_size'][0] == model_metadata['target_size'][1]
-    target_size_1d = model_metadata['target_size'][1]
+    target_size_1d = model_metadata['target_size'][0] if model_metadata['target_size'][0] >= model_metadata['target_size'][1] else model_metadata['target_size'][1]
     num_classes = model_metadata['num_classes']
 
     compiled_model = generate_compiled_segmentation_model(
@@ -143,7 +143,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         image = Image.open(image_file)
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, 640)
+        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
         segmented_image.save(Path(output_dir, image_file.name).as_posix())
 
