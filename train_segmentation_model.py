@@ -93,7 +93,8 @@ def train(gcp_bucket, config_file):
                                  shear_range=bio_augmentation['shear_range'],
                                  zoom_range=bio_augmentation['zoom_range'],
                                  horizontal_flip=bio_augmentation['horizontal_flip'],
-                                 fill_mode=bio_augmentation['fill_mode'])
+                                 fill_mode=bio_augmentation['fill_mode']
+                                 cval=0)
         train_generator = trainGenerator(
             batch_size=batch_size,
             train_path=Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
