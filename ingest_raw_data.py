@@ -71,8 +71,17 @@ def process_zip(gcp_bucket, zipped_stack):
                 # remove any non-image files
                 os.remove(f.as_posix())
             else:
-                # convert all images to greyscale (some are already and some aren't)
-                Image.open(f).convert("L").save(f)
+                # # convert all images to greyscale (some are already and some aren't)
+                # img = Image.open(f)
+                # for i in range(1000):
+                #     try:
+                #         img.seek(i)
+                #         img.convert("L")
+                #     except EOFError:
+                #         # Not enough frames in img
+                #         break
+                # img.save(f[:-4] + " grayscale" + f[-4:], save_all=True)
+                pass
 
         shutil.move(unzipped_dir.as_posix(),
                     Path(unzipped_dir.parent, 'masks' if is_mask else 'images').as_posix())

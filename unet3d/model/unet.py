@@ -1,13 +1,8 @@
-from keras import backend as K
-from keras.optimizers import Adam
-from keras.metrics import accuracy, binary_crossentropy, categorical_crossentropy
-from segmentation_models import Unet
-from segmentation_models.metrics import iou_score
-from segmentation_models.losses import jaccard_loss, dice_loss
-
 import numpy as np
+from keras import backend as K
 from keras.engine import Input, Model
 from keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, PReLU, Deconvolution3D
+from keras.optimizers import Adam
 
 from unet3d.metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
 
@@ -19,32 +14,9 @@ except ImportError:
     from keras.layers.merge import concatenate
 
 
-def generate_compiled_segmentation_model(model_name, model_parameters, num_classes, loss, optimizer,
-                                         weights_to_load=None):
-
-    # These are the only model, loss, and optimizer currently supported
-    assert model_name == 'Unet'
-    assert loss == 'cross_entropy'
-    assert optimizer == 'adam'
-
-    model = Unet(input_shape=(None, None, 1), classes=num_classes, **model_parameters)
-
-    crossentropy = binary_crossentropy if num_classes == 1 else categorical_crossentropy
-    loss_fn = crossentropy
-
-    model.compile(optimizer=Adam(),
-                  loss=loss_fn,
-                  metrics=[accuracy, iou_score, jaccard_loss, dice_loss])
-
-    if weights_to_load:
-        model.load_weights(weights_to_load)
-
-    return model
-
-
-def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_labels=1, initial_learning_rate=0.00001, deconvolution=False,
-                                            depth=4, n_base_filters=32, include_label_wise_dice_coefficients=False, metrics=dice_coefficient,
-                                            batch_normalization=False, activation_name="sigmoid", weights_to_load=None):
+def unet_model_3d(input_shape, pool_size=(2, 2, 2), n_labels=1, initial_learning_rate=0.00001, deconvolution=False,
+                  depth=4, n_base_filters=32, include_label_wise_dice_coefficients=False, metrics=dice_coefficient,
+                  batch_normalization=False, activation_name="sigmoid"):
     """
     Builds the 3D UNet Keras model.f
     :param metrics: List metrics to be calculated during model training (default is dice coefficient).
@@ -107,16 +79,13 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
             metrics = label_wise_dice_metrics
 
     model.compile(optimizer=Adam(lr=initial_learning_rate), loss=dice_coefficient_loss, metrics=metrics)
-
-    if weights_to_load:
-        model.load_weights(weights_to_load)
-
     return model
 
 
 def create_convolution_block(input_layer, n_filters, batch_normalization=False, kernel=(3, 3, 3), activation=None,
                              padding='same', strides=(1, 1, 1), instance_normalization=False):
     """
+
     :param strides:
     :param input_layer:
     :param n_filters:

@@ -11,7 +11,10 @@ from keras.callbacks import ModelCheckpoint, TensorBoard, CSVLogger
 from image_utils import TensorBoardImage, ImagesAndMasksGenerator, trainGenerator
 import git
 from gcp_utils import copy_folder_locally_if_missing
-from models import generate_compiled_segmentation_model
+
+from models import generate_compiled_segmentation_model, generate_compiled_3d_segmentation_model
+from unet3d.generator import get_training_and_validation_generators
+from unet3d.data import write_data_to_file, open_data_file
 
 
 metadata_file_name = 'metadata.yaml'
@@ -58,6 +61,9 @@ def train(gcp_bucket, config_file):
     logs_dir = Path(model_dir, 'logs')
     logs_dir.mkdir(parents=True)
 
+    data_dir = Path(tmp_directory, 'data_files')
+    data_dir.mkdir(parents=True)
+
     with Path(local_dataset_dir, train_config['dataset_id'], 'config.yaml').open('r') as f:
         dataset_config = yaml.safe_load(f)['dataset_config']
 
@@ -67,9 +73,80 @@ def train(gcp_bucket, config_file):
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
     epochs = train_config['epochs']
+    generator_type = train_config['generator_type']
     augmentation_type = train_config['data_augmentation']['augmentation_type']
 
-    if augmentation_type == 'necstlab':  # necstlab's workflow
+    if generator_type == '3D':
+        config = dict()
+
+        config["pool_size"] = (2, 2, 2)  # pool size for the max pooling operations
+        config["image_shape"] = (20, 512, 512)  # This determines what shape the images will be cropped/resampled to.
+        config["patch_shape"] = None  # switch to None to train on the whole image
+        config["labels"] = (1)  # the label numbers on the input image
+        config["n_labels"] = len(config["labels"])
+        config["all_modalities"] = ["t1", "t1ce", "flair", "t2"]
+        config["training_modalities"] = config["all_modalities"]  # change this if you want to only use some of the modalities
+        config["nb_channels"] = len(config["training_modalities"])
+        if "patch_shape" in config and config["patch_shape"] is not None:
+            config["input_shape"] = tuple([config["nb_channels"]] + list(config["patch_shape"]))
+        else:
+            config["input_shape"] = tuple([config["nb_channels"]] + list(config["image_shape"]))
+        config["truth_channel"] = config["nb_channels"]
+        config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
+
+        config["batch_size"] = 2
+        config["validation_batch_size"] = 12
+        config["n_epochs"] = 5  # cutoff the training after this many epochs
+        config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
+        config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
+        config["initial_learning_rate"] = 0.00001
+        config["learning_rate_drop"] = 0.5  # factor by which the learning rate will be reduced
+        config["validation_split"] = 0.8  # portion of the data that will be used for training
+        config["flip"] = False  # augments the data by randomly flipping an axis during
+        config["permute"] = True  # data shape must be a cube. Augments the data by permuting in various directions
+        config["distort"] = None  # switch to None if you want no distortion
+        config["augment"] = config["flip"] or config["distort"]
+        config["validation_patch_overlap"] = 0  # if > 0, during training, validation patches will be overlapping
+        config["training_patch_start_offset"] = (16, 16, 16)  # randomly offset the first patch index by up to this offset
+        config["skip_blank"] = True  # if True, then patches without any target will be skipped
+
+        config["training_data_file"] = Path(data_dir, 'training.h5').as_posix()
+        config["validation_data_file"] = Path(data_dir, 'validation.h5').as_posix()
+        # config["model_file"] = os.path.abspath("tumor_segmentation_model.h5")
+        config["overwrite"] = False  # If True, will previous files. If False, will use previously written files.
+
+        training_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix()
+        training_image_filenames = sorted(Path(training_dataset_directory, 'images').iterdir())
+        training_mask_filenames = sorted(Path(training_dataset_directory, 'masks').iterdir())
+        training_data_files = [(image, mask) for image, mask in zip(training_image_filenames, training_mask_filenames)]
+        write_data_to_file(training_data_files, config["training_data_file"], image_shape=config["image_shape"])
+        training_data_file_opened = open_data_file(config["training_data_file"])
+
+        validation_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix()
+        validation_image_filenames = sorted(Path(validation_dataset_directory, 'images').iterdir())
+        validation_mask_filenames = sorted(Path(validation_dataset_directory, 'masks').iterdir())
+        validation_data_files = [(image, mask) for image, mask in zip(validation_image_filenames, validation_mask_filenames)]
+        write_data_to_file(validation_data_files, config["validation_data_file"], image_shape=config["image_shape"])
+        validation_data_file_opened = open_data_file(config["validation_data_file"])
+
+        train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_generators(
+            training_data_file_opened,
+            validation_data_file_opened,
+            batch_size=config["batch_size"],
+            data_split=config["validation_split"],
+            overwrite=False,
+            n_labels=config["n_labels"],
+            labels=config["labels"],
+            patch_shape=config["patch_shape"],
+            validation_batch_size=config["validation_batch_size"],
+            validation_patch_overlap=config["validation_patch_overlap"],
+            training_patch_start_offset=config["training_patch_start_offset"],
+            permute=config["permute"],
+            augment=config["augment"],
+            skip_blank=config["skip_blank"],
+            augment_flip=config["flip"],
+            augment_distortion_factor=config["distort"])
+    elif augmentation_type == 'necstlab':  # necstlab's workflow
         train_generator = ImagesAndMasksGenerator(
             Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix(),
             rescale=1./255,
@@ -113,12 +190,18 @@ def train(gcp_bucket, config_file):
             target_size=target_size,
             seed=train_config['training_data_shuffle_seed'])
 
-    compiled_model = generate_compiled_segmentation_model(
-        train_config['segmentation_model']['model_name'],
-        train_config['segmentation_model']['model_parameters'],
-        1,
-        train_config['loss'],
-        train_config['optimizer'])
+    if generator_type == '2d':
+        compiled_model = generate_compiled_segmentation_model(
+            train_config['segmentation_model']['model_name'],
+            train_config['segmentation_model']['model_parameters'],
+            1,
+            train_config['loss'],
+            train_config['optimizer'])
+    elif generator_type == '3d':
+        compiled_model = generate_compiled_3d_segmentation_model(
+            train_config["input_shape"],
+            1,
+        )
 
     model_checkpoint_callback = ModelCheckpoint(Path(model_dir, 'model.hdf5').as_posix(),
                                                 monitor='loss', verbose=1, save_best_only=True)
@@ -137,10 +220,12 @@ def train(gcp_bucket, config_file):
 
     results = compiled_model.fit_generator(
         train_generator,
-        steps_per_epoch=len(train_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch'],
+        steps_per_epoch=n_train_steps if generator_type == '3D' else (len(train_generator) if augmentation_type ==
+                                                                      'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch']),
         epochs=epochs,
         validation_data=validation_generator,
-        validation_steps=len(validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps'],
+        validation_steps=n_validation_steps if generator_type == '3D' else (len(
+            validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps']),
         callbacks=[model_checkpoint_callback, tensorboard_callback, csv_logger_callback])
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
