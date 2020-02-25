@@ -6,6 +6,7 @@ import yaml
 import numpy as np
 from pathlib import Path
 from PIL import Image
+from skimage.external.tifffile import imread, imsave
 import git
 from datetime import datetime
 import pytz
@@ -112,15 +113,15 @@ def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, cla
             Path(data_prep_local_dir, 'resized', scan, 'images').mkdir(parents=True)
             Path(data_prep_local_dir, 'resized', scan, 'masks').mkdir(parents=True)
             for image_ind in range(len(scan_image_files)):
-                image = Image.open(scan_image_files[image_ind])
-                mask = Image.open(scan_mask_files[image_ind])
+                image = imread(scan_image_files[image_ind])
+                mask = imread(scan_mask_files[image_ind])
                 if image_cropping_params['type'] == 'None':
                     image.thumbnail(target_size)
                     mask.thumbnail(target_size)
-                    image.save(Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
-                        image_ind].name).as_posix())
-                    mask.save(Path(data_prep_local_dir, 'resized', scan, 'masks', scan_mask_files[
-                        image_ind].name).as_posix())
+                    imsave(Path(data_prep_local_dir, 'resized', scan, 'images', scan_image_files[
+                        image_ind].name).as_posix(), image)
+                    imsave(Path(data_prep_local_dir, 'resized', scan, 'masks', scan_mask_files[
+                        image_ind].name).as_posix(), mask)
                 elif image_cropping_params['type'] == 'random':
                     assert 'num_per_image' in image_cropping_params
                     assert image_cropping_params['num_per_image'] > 0
