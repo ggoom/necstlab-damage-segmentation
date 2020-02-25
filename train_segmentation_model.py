@@ -80,7 +80,7 @@ def train(gcp_bucket, config_file):
         config = dict()
 
         config["pool_size"] = (2, 2, 2)  # pool size for the max pooling operations
-        config["image_shape"] = (20, 512, 512)  # This determines what shape the images will be cropped/resampled to.
+        config["image_shape"] = (20, 512, 512, 1)  # This determines what shape the images will be cropped/resampled to.
         config["patch_shape"] = None  # switch to None to train on the whole image
         config["labels"] = (1,)  # the label numbers on the input image
         config["n_labels"] = len(config["labels"])
@@ -203,7 +203,7 @@ def train(gcp_bucket, config_file):
             1,
         )
 
-        print(model.summary())
+        print(compiled_model.summary())
 
     model_checkpoint_callback = ModelCheckpoint(Path(model_dir, 'model.hdf5').as_posix(),
                                                 monitor='loss', verbose=1, save_best_only=True)
