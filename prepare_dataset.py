@@ -114,8 +114,8 @@ def resize_and_crop(data_prep_local_dir, target_size, image_cropping_params, cla
             Path(data_prep_local_dir, 'resized', scan, 'images').mkdir(parents=True)
             Path(data_prep_local_dir, 'resized', scan, 'masks').mkdir(parents=True)
             for image_ind in range(len(scan_image_files)):
-                image = imread(scan_image_files[image_ind])
-                mask = imread(scan_mask_files[image_ind])
+                image = imread(scan_image_files[image_ind].as_posix())
+                mask = imread(scan_mask_files[image_ind].as_posix())
                 if image_cropping_params['type'] == 'None':
                     image.thumbnail(target_size)
                     mask.thumbnail(target_size)
