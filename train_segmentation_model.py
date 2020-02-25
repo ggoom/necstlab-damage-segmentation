@@ -199,9 +199,11 @@ def train(gcp_bucket, config_file):
             train_config['optimizer'])
     elif generator_type == '3D':
         compiled_model = generate_compiled_3d_segmentation_model(
-            (20, 512, 512),  # config["image_shape"],
+            config["image_shape"],
             1,
         )
+
+        print(model.summary())
 
     model_checkpoint_callback = ModelCheckpoint(Path(model_dir, 'model.hdf5').as_posix(),
                                                 monitor='loss', verbose=1, save_best_only=True)
