@@ -15,25 +15,25 @@ def create_data_file(out_file, n_channels, n_samples, image_shape):
                                            filters=filters, expectedrows=n_samples)
     truth_storage = hdf5_file.create_earray(hdf5_file.root, 'truth', tables.UInt8Atom(), shape=truth_shape,
                                             filters=filters, expectedrows=n_samples)
-    affine_storage = hdf5_file.create_earray(hdf5_file.root, 'affine', tables.Float32Atom(), shape=(0, 4, 4),
-                                             filters=filters, expectedrows=n_samples)
-    return hdf5_file, data_storage, truth_storage, affine_storage
+    # affine_storage = hdf5_file.create_earray(hdf5_file.root, 'affine', tables.Float32Atom(), shape=(0, 4, 4),
+    #                                          filters=filters, expectedrows=n_samples)
+    return hdf5_file, data_storage, truth_storage
 
 
-def write_image_data_to_file(image_files, data_storage, truth_storage, image_shape, n_channels, affine_storage,
+def write_image_data_to_file(image_files, data_storage, truth_storage, image_shape, n_channels,
                              truth_dtype=np.uint8, crop=True):
     for set_of_files in image_files:
         images = reslice_image_set(set_of_files, image_shape, label_indices=len(set_of_files) - 1, crop=crop)
         subject_data = images  # [image  for image in images]
-        add_data_to_storage(data_storage, truth_storage, affine_storage, subject_data, images[0].affine, n_channels,
+        add_data_to_storage(data_storage, truth_storage, subject_data, n_channels,
                             truth_dtype)
     return data_storage, truth_storage
 
 
-def add_data_to_storage(data_storage, truth_storage, affine_storage, subject_data, affine, n_channels, truth_dtype):
+def add_data_to_storage(data_storage, truth_storage, subject_data, n_channels, truth_dtype):
     data_storage.append(np.asarray(subject_data[:n_channels])[np.newaxis])
     truth_storage.append(np.asarray(subject_data[n_channels], dtype=truth_dtype)[np.newaxis][np.newaxis])
-    affine_storage.append(np.asarray(affine)[np.newaxis])
+    # affine_storage.append(np.asarray(affine)[np.newaxis])
 
 
 def write_data_to_file(training_data_files, out_file, image_shape, truth_dtype=np.uint8, subject_ids=None,
@@ -53,17 +53,17 @@ def write_data_to_file(training_data_files, out_file, image_shape, truth_dtype=n
     n_channels = len(training_data_files[0]) - 1
 
     try:
-        hdf5_file, data_storage, truth_storage, affine_storage = create_data_file(out_file,
-                                                                                  n_channels=n_channels,
-                                                                                  n_samples=n_samples,
-                                                                                  image_shape=image_shape)
+        hdf5_file, data_storage, truth_storage = create_data_file(out_file,
+                                                                  n_channels=n_channels,
+                                                                  n_samples=n_samples,
+                                                                  image_shape=image_shape)
     except Exception as e:
         # If something goes wrong, delete the incomplete data file
         os.remove(out_file)
         raise e
 
     write_image_data_to_file(training_data_files, data_storage, truth_storage, image_shape,
-                             truth_dtype=truth_dtype, n_channels=n_channels, affine_storage=affine_storage, crop=crop)
+                             truth_dtype=truth_dtype, n_channels=n_channels, crop=crop)
     if subject_ids:
         hdf5_file.create_array(hdf5_file.root, 'subject_ids', obj=subject_ids)
     if normalize:
