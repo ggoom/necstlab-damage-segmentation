@@ -199,7 +199,7 @@ def train(gcp_bucket, config_file):
             train_config['optimizer'])
     elif generator_type == '3D':
         compiled_model = generate_compiled_3d_segmentation_model(
-            train_config["input_shape"],
+            config["image_shape"],
             1,
         )
 
