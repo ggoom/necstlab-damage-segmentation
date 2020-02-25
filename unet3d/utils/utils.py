@@ -5,6 +5,7 @@ import collections
 import nibabel as nib
 import numpy as np
 from nilearn.image import reorder_img, new_img_like
+from skimage.external.tifffile import imread
 
 from .nilearn_custom_utils.nilearn_utils import crop_img_to
 from .sitk_utils import resample_to_spacing, calculate_origin_offset
@@ -26,7 +27,7 @@ def get_affine(in_file):
 
 def read_image_files(image_files, image_shape=None, crop=None, label_indices=None):
     """
-    
+
     :param image_files: 
     :param image_shape: 
     :param crop: 
@@ -52,8 +53,8 @@ def read_image_files(image_files, image_shape=None, crop=None, label_indices=Non
 
 def read_image(in_file, image_shape=None, interpolation='linear', crop=None):
     print("Reading: {0}".format(in_file))
-    image = nib.load(os.path.abspath(in_file))
-    image = fix_shape(image)
+    image = imread(in_file)
+    # image = fix_shape(image)
     if crop:
         image = crop_img_to(image, crop, copy=True)
     if image_shape:

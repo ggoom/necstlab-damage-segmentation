@@ -51,8 +51,8 @@ def get_complete_foreground(training_data_files):
 def get_foreground_from_set_of_files(set_of_files, background_value=0, tolerance=0.00001, return_image=False):
     for i, image_file in enumerate(set_of_files):
         image = read_image(image_file)
-        is_foreground = np.logical_or(image.get_data() < (background_value - tolerance),
-                                      image.get_data() > (background_value + tolerance))
+        is_foreground = np.logical_or(image < (background_value - tolerance),
+                                      image > (background_value + tolerance))
         if i == 0:
             foreground = np.zeros(is_foreground.shape, dtype=np.uint8)
 
@@ -81,5 +81,3 @@ def normalize_data_storage(data_storage):
     for index in range(data_storage.shape[0]):
         data_storage[index] = normalize_data(data_storage[index], mean, std)
     return data_storage
-
-
