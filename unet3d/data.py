@@ -2,6 +2,7 @@ import os
 
 import numpy as np
 import tables
+import sys
 
 from .normalize import normalize_data_storage, reslice_image_set
 
@@ -11,6 +12,7 @@ def create_data_file(out_file, n_channels, n_samples, image_shape):
     filters = tables.Filters(complevel=5, complib='blosc')
     data_shape = tuple([0, n_channels] + list(image_shape))
     truth_shape = tuple([0, 1] + list(image_shape))
+    sys.stdout.println("*************" + str(n_samples) + "***" + str(n_channels))
     data_storage = hdf5_file.create_earray(hdf5_file.root, 'data', tables.Float32Atom(), shape=data_shape,
                                            filters=filters, expectedrows=n_samples)
     truth_storage = hdf5_file.create_earray(hdf5_file.root, 'truth', tables.UInt8Atom(), shape=truth_shape,
