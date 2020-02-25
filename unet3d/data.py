@@ -12,7 +12,7 @@ def create_data_file(out_file, n_channels, n_samples, image_shape):
     filters = tables.Filters(complevel=5, complib='blosc')
     data_shape = tuple([0, n_channels] + list(image_shape))
     truth_shape = tuple([0, 1] + list(image_shape))
-    sys.stdout.write("*************" + str(n_samples) + "***" + str(n_channels))
+    sys.stdout.write("*************" + str(data_shape))
     data_storage = hdf5_file.create_earray(hdf5_file.root, 'data', tables.Float32Atom(), shape=data_shape,
                                            filters=filters, expectedrows=n_samples)
     truth_storage = hdf5_file.create_earray(hdf5_file.root, 'truth', tables.UInt8Atom(), shape=truth_shape,
@@ -33,7 +33,7 @@ def write_image_data_to_file(image_files, data_storage, truth_storage, image_sha
 
 
 def add_data_to_storage(data_storage, truth_storage, subject_data, n_channels, truth_dtype):
-    data_storage.append(np.asarray(subject_data[:n_channels]))
+    data_storage.append(np.asarray(subject_data[:n_channels])[np.newaxis])
     truth_storage.append(np.asarray(subject_data[n_channels], dtype=truth_dtype)[np.newaxis][np.newaxis])
     # affine_storage.append(np.asarray(affine)[np.newaxis])
 
