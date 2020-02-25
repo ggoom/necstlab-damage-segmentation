@@ -65,7 +65,7 @@ def read_image(in_file, image_shape=None, interpolation='linear', crop=None):
 
 def fix_shape(image):
     if image.shape[-1] == 1:
-        return image.__class__(dataobj=np.squeeze(image.get_data()), affine=image.affine)
+        return image.__class__(dataobj=np.squeeze(image), affine=image.affine)
     return image
 
 
@@ -73,7 +73,7 @@ def resize(image, new_shape, interpolation="linear"):
     image = reorder_img(image, resample=interpolation)
     zoom_level = np.divide(new_shape, image.shape)
     new_spacing = np.divide(image.header.get_zooms(), zoom_level)
-    new_data = resample_to_spacing(image.get_data(), image.header.get_zooms(), new_spacing,
+    new_data = resample_to_spacing(image, image.header.get_zooms(), new_spacing,
                                    interpolation=interpolation)
     new_affine = np.copy(image.affine)
     np.fill_diagonal(new_affine, new_spacing.tolist() + [1])

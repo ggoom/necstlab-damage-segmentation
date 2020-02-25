@@ -24,7 +24,7 @@ def write_image_data_to_file(image_files, data_storage, truth_storage, image_sha
                              truth_dtype=np.uint8, crop=True):
     for set_of_files in image_files:
         images = reslice_image_set(set_of_files, image_shape, label_indices=len(set_of_files) - 1, crop=crop)
-        subject_data = [image.get_data() for image in images]
+        subject_data = images  # [image  for image in images]
         add_data_to_storage(data_storage, truth_storage, affine_storage, subject_data, images[0].affine, n_channels,
                             truth_dtype)
     return data_storage, truth_storage
