@@ -190,14 +190,14 @@ def train(gcp_bucket, config_file):
             target_size=target_size,
             seed=train_config['training_data_shuffle_seed'])
 
-    if generator_type == '2d':
+    if generator_type == '2D':
         compiled_model = generate_compiled_segmentation_model(
             train_config['segmentation_model']['model_name'],
             train_config['segmentation_model']['model_parameters'],
             1,
             train_config['loss'],
             train_config['optimizer'])
-    elif generator_type == '3d':
+    elif generator_type == '3D':
         compiled_model = generate_compiled_3d_segmentation_model(
             train_config["input_shape"],
             1,
