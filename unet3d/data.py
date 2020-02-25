@@ -4,7 +4,7 @@ import numpy as np
 import tables
 import sys
 
-from .normalize import normalize_data_storage, reslice_image_set
+from .normalize import normalize_data_storage, reslice_image_set, read_image_files
 
 
 def create_data_file(out_file, n_channels, n_samples, image_shape):
@@ -25,7 +25,7 @@ def create_data_file(out_file, n_channels, n_samples, image_shape):
 def write_image_data_to_file(image_files, data_storage, truth_storage, image_shape, n_channels,
                              truth_dtype=np.uint8, crop=True):
     for set_of_files in image_files:
-        images = reslice_image_set(set_of_files, image_shape, label_indices=len(set_of_files) - 1, crop=crop)
+        images = read_image_files(set_of_files, image_shape, label_indices=len(set_of_files) - 1, crop=crop)
         subject_data = images  # [image  for image in images]
         add_data_to_storage(data_storage, truth_storage, subject_data, n_channels,
                             truth_dtype)
