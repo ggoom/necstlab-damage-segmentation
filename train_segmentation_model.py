@@ -119,14 +119,14 @@ def train(gcp_bucket, config_file):
         training_image_filenames = sorted(Path(training_dataset_directory, 'images').iterdir())
         training_mask_filenames = sorted(Path(training_dataset_directory, 'masks').iterdir())
         training_data_files = [(image, mask) for image, mask in zip(training_image_filenames, training_mask_filenames)]
-        write_data_to_file(training_data_files, config["training_data_file"], image_shape=config["image_shape"])
+        write_data_to_file(training_data_files, config["training_data_file"], image_shape=config["image_shape"], crop=False)
         training_data_file_opened = open_data_file(config["training_data_file"])
 
         validation_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix()
         validation_image_filenames = sorted(Path(validation_dataset_directory, 'images').iterdir())
         validation_mask_filenames = sorted(Path(validation_dataset_directory, 'masks').iterdir())
         validation_data_files = [(image, mask) for image, mask in zip(validation_image_filenames, validation_mask_filenames)]
-        write_data_to_file(validation_data_files, config["validation_data_file"], image_shape=config["image_shape"])
+        write_data_to_file(validation_data_files, config["validation_data_file"], image_shape=config["image_shape"], crop=False)
         validation_data_file_opened = open_data_file(config["validation_data_file"])
 
         train_generator, validation_generator, n_train_steps, n_validation_steps = get_training_and_validation_generators(
