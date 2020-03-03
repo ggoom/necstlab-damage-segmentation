@@ -6,6 +6,8 @@ import sys
 
 from .normalize import normalize_data_storage, reslice_image_set, read_image_files
 
+import h5py
+
 
 def create_data_file(out_file, n_channels, n_samples, image_shape):
     hdf5_file = tables.open_file(out_file, mode='w')
@@ -72,6 +74,10 @@ def write_data_to_file(training_data_files, out_file, image_shape, truth_dtype=n
     if normalize:
         normalize_data_storage(data_storage)
     hdf5_file.close()
+
+    f = h5py.File(hdf5_file)
+    print(f)
+
     return out_file
 
 
