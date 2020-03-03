@@ -7,6 +7,7 @@ import sys
 from .normalize import normalize_data_storage, reslice_image_set, read_image_files
 
 import h5py
+import sys
 
 
 def create_data_file(out_file, n_channels, n_samples, image_shape):
@@ -75,8 +76,13 @@ def write_data_to_file(training_data_files, out_file, image_shape, truth_dtype=n
         normalize_data_storage(data_storage)
     hdf5_file.close()
 
-    f = h5py.File(hdf5_file)
-    print(f)
+    with h5py.File(out_file, 'r') as f:
+        # List all groups
+        print("Keys: %s" % f.keys())
+        a_group_key = list(f.keys())[0]
+        # Get the data
+        data = list(f[a_group_key])
+        sys.stdout.write(data)
 
     return out_file
 
