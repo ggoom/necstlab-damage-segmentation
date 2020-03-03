@@ -80,7 +80,7 @@ def train(gcp_bucket, config_file):
         config = dict()
 
         config["pool_size"] = (2, 2, 2)  # pool size for the max pooling operations
-        config["image_shape"] = (1, 20, 512, 512)  # This determines what shape the images will be cropped/resampled to.
+        config["image_shape"] = (20, 512, 512)  # This determines what shape the images will be cropped/resampled to.
         config["patch_shape"] = None  # switch to None to train on the whole image
         config["labels"] = (1,)  # the label numbers on the input image
         config["n_labels"] = len(config["labels"])
@@ -201,6 +201,7 @@ def train(gcp_bucket, config_file):
         compiled_model = generate_compiled_3d_segmentation_model(
             (1, 20, 512, 512),  # config["image_shape"],
             1,
+            depth=2,
         )
 
         print(compiled_model.summary())
