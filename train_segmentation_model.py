@@ -200,7 +200,6 @@ def train(gcp_bucket, config_file):
     elif generator_type == '3D':
         compiled_model = generate_compiled_3d_segmentation_model(
             (1, 20, 512, 512),  # config["image_shape"],
-            1,
             depth=2,
         )
 
