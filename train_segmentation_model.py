@@ -46,10 +46,11 @@ def train(gcp_bucket, config_file):
         pass
     tmp_directory.mkdir()
 
-    local_dataset_dir = Path(tmp_directory, 'datasets')
-
-    copy_folder_locally_if_missing(os.path.join(gcp_bucket, 'datasets', train_config['dataset_id']),
-                                   local_dataset_dir)
+    local_dataset_dir = Path('mounted', 'datasets')
+    # GOOFYS mounted bucket replaced this
+    # local_dataset_dir = Path(tmp_directory, 'datasets')
+    # copy_folder_locally_if_missing(os.path.join(gcp_bucket, 'datasets', train_config['dataset_id']),
+    #                                local_dataset_dir)
 
     model_id = "{}_{}".format(train_config['model_id_prefix'], datetime.now(pytz.UTC).strftime('%Y%m%dT%H%M%SZ'))
     model_dir = Path(tmp_directory, 'models', model_id)
