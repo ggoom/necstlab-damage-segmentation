@@ -4,10 +4,10 @@ import collections
 
 import nibabel as nib
 import numpy as np
-from nilearn.image import reorder_img, new_img_like
+# from nilearn.image import reorder_img, new_img_like
 from skimage.external.tifffile import imread
 
-from .nilearn_custom_utils.nilearn_utils import crop_img_to
+# from .nilearn_custom_utils.nilearn_utils import crop_img_to
 from .sitk_utils import resample_to_spacing, calculate_origin_offset
 
 import sys
@@ -59,9 +59,9 @@ def read_image(in_file, image_shape=None, interpolation='linear', crop=None):
     # sys.stdout.write(str(image.shape) + "\n")
     # image = fix_shape(image)
     if crop:
-        image = crop_img_to(image, crop, copy=True)
-    # if image_shape:
-    #     return resize(image, new_shape=image_shape, interpolation=interpolation)
+        # image = crop_img_to(image, crop, copy=True)
+        # if image_shape:
+        #     return resize(image, new_shape=image_shape, interpolation=interpolation)
     else:
         return image
 
@@ -72,13 +72,13 @@ def fix_shape(image):
     return image
 
 
-def resize(image, new_shape, interpolation="linear"):
-    image = reorder_img(image, resample=interpolation)
-    zoom_level = np.divide(new_shape, image.shape)
-    new_spacing = np.divide(image.header.get_zooms(), zoom_level)
-    new_data = resample_to_spacing(image, image.header.get_zooms(), new_spacing,
-                                   interpolation=interpolation)
-    new_affine = np.copy(image.affine)
-    np.fill_diagonal(new_affine, new_spacing.tolist() + [1])
-    new_affine[:3, 3] += calculate_origin_offset(new_spacing, image.header.get_zooms())
-    return new_img_like(image, new_data, affine=new_affine)
+# def resize(image, new_shape, interpolation="linear"):
+#     image = reorder_img(image, resample=interpolation)
+#     zoom_level = np.divide(new_shape, image.shape)
+#     new_spacing = np.divide(image.header.get_zooms(), zoom_level)
+#     new_data = resample_to_spacing(image, image.header.get_zooms(), new_spacing,
+#                                    interpolation=interpolation)
+#     new_affine = np.copy(image.affine)
+#     np.fill_diagonal(new_affine, new_spacing.tolist() + [1])
+#     new_affine[:3, 3] += calculate_origin_offset(new_spacing, image.header.get_zooms())
+#     return new_img_like(image, new_data, affine=new_affine)
