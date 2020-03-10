@@ -2,7 +2,7 @@ import pickle
 import os
 import collections
 
-import nibabel as nib
+# import nibabel as nib
 import numpy as np
 # from nilearn.image import reorder_img, new_img_like
 from skimage.external.tifffile import imread
