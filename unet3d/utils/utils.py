@@ -62,6 +62,7 @@ def read_image(in_file, image_shape=None, interpolation='linear', crop=None):
         # image = crop_img_to(image, crop, copy=True)
         # if image_shape:
         #     return resize(image, new_shape=image_shape, interpolation=interpolation)
+        pass
     else:
         return image
 
