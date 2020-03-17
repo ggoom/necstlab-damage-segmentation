@@ -1,6 +1,6 @@
 import numpy as np
-# import nibabel as nib
-# from nilearn.image import new_img_like, resample_to_img
+import nibabel as nib
+from nilearn.image import new_img_like, resample_to_img
 import random
 import itertools
 
@@ -70,8 +70,8 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
     return data, truth_data
 
 
-# def get_image(data, affine, nib_class=nib.Nifti1Image):
-#     return nib_class(dataobj=data, affine=affine)
+def get_image(data, affine, nib_class=nib.Nifti1Image):
+    return nib_class(dataobj=data, affine=affine)
 
 
 def generate_permutation_keys():
