@@ -1,22 +1,23 @@
-from keras import backend as K
-from keras.optimizers import Adam
-from keras.metrics import accuracy, binary_crossentropy, categorical_crossentropy
+from tensorflow.keras import backend as K
+from tensorflow.keras.optimizers import Adam
+from tensorflow.python.keras.metrics import accuracy, binary_crossentropy, categorical_crossentropy
 from segmentation_models import Unet
 from segmentation_models.metrics import iou_score
 from segmentation_models.losses import jaccard_loss, dice_loss
 
 import numpy as np
-from keras.engine import Input, Model
-from keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, PReLU, Deconvolution3D
+from tensorflow.keras import Input
+from tensorflow.keras.models import Model
+from tensorflow.python.keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, PReLU, Conv3DTranspose as Deconvolution3D
 
 from unet3d.metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
 
 K.set_image_data_format("channels_first")
 
 try:
-    from keras.engine import merge
+    from tensorflow.keras.engine import merge
 except ImportError:
-    from keras.layers.merge import concatenate
+    from tensorflow.keras.layers import concatenate
 
 
 def generate_compiled_segmentation_model(model_name, model_parameters, num_classes, loss, optimizer,
@@ -84,11 +85,11 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
     # add levels with up-convolution or up-sampling
     for layer_depth in range(depth-2, -1, -1):
         up_convolution = get_up_convolution(pool_size=pool_size, deconvolution=deconvolution,
-                                            n_filters=current_layer._keras_shape[1])(current_layer)
+                                            n_filters=current_layer.shape[1])(current_layer)
         concat = concatenate([up_convolution, levels[layer_depth][1]], axis=1)
-        current_layer = create_convolution_block(n_filters=levels[layer_depth][1]._keras_shape[1],
+        current_layer = create_convolution_block(n_filters=levels[layer_depth][1].shape[1],
                                                  input_layer=concat, batch_normalization=batch_normalization)
-        current_layer = create_convolution_block(n_filters=levels[layer_depth][1]._keras_shape[1],
+        current_layer = create_convolution_block(n_filters=levels[layer_depth][1].shape[1],
                                                  input_layer=current_layer,
                                                  batch_normalization=batch_normalization)
 

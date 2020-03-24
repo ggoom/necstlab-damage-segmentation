@@ -3,9 +3,9 @@ from collections import OrderedDict
 from pathlib import Path
 import numpy as np
 import tensorflow as tf
-from keras.utils import Sequence
-import keras
-from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.utils import Sequence
+import tensorflow.keras as keras
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
 import io
 import sys
