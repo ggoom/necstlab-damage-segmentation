@@ -16,11 +16,6 @@ from models import generate_compiled_segmentation_model, generate_compiled_3d_se
 from unet3d.generator import get_training_and_validation_generators
 from unet3d.data import write_data_to_file, open_data_file
 
-import tensorflow as tf
-import keras.backend.tensorflow_backend as tfback
-print("tf.__version__ is", tf.__version__)
-print("tf.keras.__version__ is:", tf.keras.__version__)
-
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
 
