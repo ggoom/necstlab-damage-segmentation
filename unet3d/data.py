@@ -76,13 +76,13 @@ def write_data_to_file(training_data_files, out_file, image_shape, truth_dtype=n
         normalize_data_storage(data_storage)
     hdf5_file.close()
 
-    with h5py.File(out_file, 'r') as f:
-        # List all groups
-        print("Keys: %s" % f.keys())
-        a_group_key = list(f.keys())[0]
-        # Get the data
-        data = list(f[a_group_key])
-        sys.stdout.write(str(data))
+    # with h5py.File(out_file, 'r') as f:
+    #     # List all groups
+    #     print("Keys: %s" % f.keys())
+    #     a_group_key = list(f.keys())[0]
+    #     # Get the data
+    #     data = list(f[a_group_key])
+    #     sys.stdout.write(str(data))
 
     return out_file
 
