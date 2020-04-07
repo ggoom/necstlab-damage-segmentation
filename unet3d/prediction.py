@@ -45,7 +45,7 @@ def get_prediction_labels(prediction, threshold=0.5, labels=None):
         if labels:
             for value in np.unique(label_data).tolist()[1:]:
                 label_data[label_data == value] = labels[value - 1]
-        label_arrays.append(np.array(label_data, dtype=np.uint8))
+        label_arrays.append(np.array(label_data, dtype=np.float32))
     return label_arrays
 
 
