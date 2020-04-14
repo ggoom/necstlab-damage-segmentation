@@ -92,7 +92,7 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
 
 
 def get_number_of_steps(n_samples, batch_size):
-    sys.stdout.write("SAMPLES +" str(n_samples) + " batch size " + str(batch_size))
+    sys.stdout.write("SAMPLES " + str(n_samples) + " batch size " + str(batch_size))
     if n_samples <= batch_size:
         return n_samples
     elif np.remainder(n_samples, batch_size) == 0:
