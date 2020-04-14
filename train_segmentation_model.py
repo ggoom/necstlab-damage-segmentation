@@ -122,10 +122,11 @@ def train(gcp_bucket, config_file):
         sys.stdout.write("MASK IMAGES: " + str(len(training_mask_filenames)))
 
         training_data_files = [(image, mask) for image, mask in zip(training_image_filenames, training_mask_filenames)]
-        sys.stdout.write("training_data_files FILENAMES: " + str(len(training_data_files)))
+        sys.stdout.write("training_data_files LEN: " + str(len(training_data_files)))
         write_data_to_file(training_data_files, config["training_data_file"], image_shape=config["image_shape"], crop=False)
         training_data_file_opened = open_data_file(config["training_data_file"])
-        sys.stdout.write("OPENED: " + str(training_data_file_opened))
+        sys.stdout.write("OPENED: " + str(training_data_file_opened) + "\n\n\n")
+        sys.stdout.write(str(len(list(training_data_file_opened))))
 
         validation_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix()
         validation_image_filenames = sorted(Path(validation_dataset_directory, 'images').iterdir())
