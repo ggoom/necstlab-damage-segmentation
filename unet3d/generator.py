@@ -53,7 +53,7 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
 
     training_list = list(range(len(list(data_file_training))))
     validation_list = list(range(len(list(data_file_validation))))
-    sys.stdout.write(training_list)
+    sys.stdout.write(str(training_list))
 
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
