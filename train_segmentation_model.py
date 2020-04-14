@@ -116,8 +116,8 @@ def train(gcp_bucket, config_file):
         config["overwrite"] = False  # If True, will previous files. If False, will use previously written files.
 
         training_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix()
-        training_image_filenames = sorted([file.as_posix() for file in Path(training_dataset_directory, 'images').iterdir()])
-        training_mask_filenames = sorted([file.as_posix() for file in Path(training_dataset_directory, 'masks').iterdir()])
+        training_image_filenames = sorted(Path(training_dataset_directory, 'images').iterdir())
+        training_mask_filenames = sorted(Path(training_dataset_directory, 'masks').iterdir())
         sys.stdout.write("TRAINING IMAGES: " + str(len(training_image_filenames)))
         sys.stdout.write("MASK IMAGES: " + str(len(training_mask_filenames)))
 
