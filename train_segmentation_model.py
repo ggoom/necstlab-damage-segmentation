@@ -208,7 +208,7 @@ def train(gcp_bucket, config_file):
             (1, 20, 512, 512),  # config["image_shape"],
             n_labels=1,
             # n_base_filters=4,
-            # depth=2,
+            depth=2,
         )
 
         print(compiled_model.summary())
