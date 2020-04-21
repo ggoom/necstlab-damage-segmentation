@@ -232,7 +232,7 @@ def train(gcp_bucket, config_file):
         train_generator,
         steps_per_epoch=n_train_steps if generator_type == '3D' else (len(train_generator) if augmentation_type ==
                                                                       'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch']),
-        workers=1,
+        workers=2,
         epochs=epochs,
         verbose=1,
         validation_data=validation_generator,
