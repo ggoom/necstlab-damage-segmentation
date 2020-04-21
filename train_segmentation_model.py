@@ -72,7 +72,7 @@ def train(gcp_bucket, config_file):
 
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
-    epochs = train_config['epochs']
+    epochs = 1
     generator_type = train_config['generator_type']
     augmentation_type = train_config['data_augmentation']['augmentation_type']
 
