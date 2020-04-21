@@ -3,6 +3,7 @@ import os
 import nibabel as nib
 import numpy as np
 import tables
+from scikit import imsave
 
 from .training import load_old_model
 from .utils import pickle_load
@@ -70,7 +71,7 @@ def predict_from_data_file_and_write_image(model, open_data_file, index, out_fil
     image.to_filename(out_file)
 
 
-def prediction_to_image(prediction, affine, label_map=False, threshold=0.5, labels=None):
+def prediction_to_image(prediction, label_map=False, threshold=0.5, labels=None):
     if prediction.shape[1] == 1:
         data = prediction[0, 0]
         if label_map:
@@ -81,15 +82,15 @@ def prediction_to_image(prediction, affine, label_map=False, threshold=0.5, labe
                 label = 1
             label_map_data[data > threshold] = label
             data = label_map_data
-    elif prediction.shape[1] > 1:
-        if label_map:
-            label_map_data = get_prediction_labels(prediction, threshold=threshold, labels=labels)
-            data = label_map_data[0]
-        else:
-            return multi_class_prediction(prediction, affine)
+    # elif prediction.shape[1] > 1:
+    #     if label_map:
+    #         label_map_data = get_prediction_labels(prediction, threshold=threshold, labels=labels)
+    #         data = label_map_data[0]
+    #     else:
+    #         return multi_class_prediction(prediction, affine)
     else:
         raise RuntimeError("Invalid prediction array shape: {0}".format(prediction.shape))
-    return nib.Nifti1Image(data, affine)
+    return data
 
 
 def multi_class_prediction(prediction, affine):
@@ -117,27 +118,27 @@ def run_validation_case(data_index, output_dir, model, data_file, training_modal
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    affine = data_file.root.affine[data_index]
+    # affine = data_file.root.affine[data_index]
     test_data = np.asarray([data_file.root.data[data_index]])
-    for i, modality in enumerate(training_modalities):
-        image = nib.Nifti1Image(test_data[0, i], affine)
-        image.to_filename(os.path.join(output_dir, "data_{0}.nii.gz".format(modality)))
+    # for i, modality in enumerate(training_modalities):
+    #     image = nib.Nifti1Image(test_data[0, i], affine)
+    #     image.to_filename(os.path.join(output_dir, "data_{0}.nii.gz".format(modality)))
 
-    test_truth = nib.Nifti1Image(data_file.root.truth[data_index][0], affine)
-    test_truth.to_filename(os.path.join(output_dir, "truth.nii.gz"))
+    # test_truth = nib.Nifti1Image(data_file.root.truth[data_index][0], affine)
+    # test_truth.to_filename(os.path.join(output_dir, "truth.nii.gz"))
 
     patch_shape = tuple([int(dim) for dim in model.input.shape[-3:]])
     if patch_shape == test_data.shape[-3:]:
         prediction = predict(model, test_data, permute=permute)
-    else:
-        prediction = patch_wise_prediction(model=model, data=test_data, overlap=overlap, permute=permute)[np.newaxis]
-    prediction_image = prediction_to_image(prediction, affine, label_map=output_label_map, threshold=threshold,
+    # else:
+    #     prediction = patch_wise_prediction(model=model, data=test_data, overlap=overlap, permute=permute)[np.newaxis]
+    prediction_image = prediction_to_image(prediction, label_map=output_label_map, threshold=threshold,
                                            labels=labels)
     if isinstance(prediction_image, list):
         for i, image in enumerate(prediction_image):
-            image.to_filename(os.path.join(output_dir, "prediction_{0}.nii.gz".format(i + 1)))
+            image.to_filename(os.path.join(output_dir, "prediction_{0}.tiff".format(i + 1)))
     else:
-        prediction_image.to_filename(os.path.join(output_dir, "prediction.nii.gz"))
+        imsave(os.path.join(output_dir, "prediction.tiff"), prediction_image)
 
 
 def run_validation_cases(validation_keys_file, model_file, training_modalities, labels, hdf5_file,

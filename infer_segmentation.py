@@ -7,7 +7,7 @@ import pytz
 from PIL import Image, ImageOps
 from pathlib import Path
 import git
-from models import generate_compiled_segmentation_model
+from models import generate_compiled_segmentation_model, generate_compiled_3d_segmentation_model
 
 
 metadata_file_name = 'metadata.yaml'
@@ -129,13 +129,34 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
     target_size_1d = model_metadata['target_size'][0] if model_metadata['target_size'][0] >= model_metadata['target_size'][1] else model_metadata['target_size'][1]
     num_classes = model_metadata['num_classes']
 
-    compiled_model = generate_compiled_segmentation_model(
-        train_config['segmentation_model']['model_name'],
-        train_config['segmentation_model']['model_parameters'],
-        num_classes,
-        train_config['loss'],
-        train_config['optimizer'],
-        Path(local_model_dir, "model.hdf5").as_posix())
+    generator_type = train_config['generator_type']
+
+    # compiled_model = generate_compiled_segmentation_model(
+    #     train_config['segmentation_model']['model_name'],
+    #     train_config['segmentation_model']['model_parameters'],
+    #     num_classes,
+    #     train_config['loss'],
+    #     train_config['optimizer'],
+    #     Path(local_model_dir, "model.hdf5").as_posix())
+
+    if generator_type == '2D':
+        compiled_model = generate_compiled_segmentation_model(
+            train_config['segmentation_model']['model_name'],
+            train_config['segmentation_model']['model_parameters'],
+            1,
+            train_config['loss'],
+            train_config['optimizer'],
+            Path(local_model_dir, "model.hdf5").as_posix())
+    elif generator_type == '3D':
+        compiled_model = generate_compiled_3d_segmentation_model(
+            (1, 20, 512, 512),  # config["image_shape"],
+            n_labels=1,
+            n_base_filters=4,
+            depth=2,
+            weights_to_load=Path(local_model_dir, "model.hdf5").as_posix()
+        )
+
+        print(compiled_model.summary())
 
     n_images = len(list(Path(image_folder).iterdir()))
     for i, image_file in enumerate(sorted(Path(image_folder).iterdir())):
