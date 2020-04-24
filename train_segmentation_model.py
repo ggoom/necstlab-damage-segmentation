@@ -216,7 +216,7 @@ def train(gcp_bucket, config_file):
     model_checkpoint_callback = ModelCheckpoint(Path(model_dir, 'model.hdf5').as_posix(),
                                                 monitor='loss', verbose=1, save_best_only=True)
     tensorboard_callback = TensorBoard(log_dir=logs_dir.as_posix(), batch_size=batch_size, write_graph=True,
-                                       write_grads=False, write_images=True, update_freq='epoch')
+                                       write_grads=False, write_images=True, update_freq='epoch', profile_batch=0)
 
     # n_sample_images = 20
     # train_image_and_mask_paths = sample_image_and_mask_paths(train_generator, n_sample_images)
