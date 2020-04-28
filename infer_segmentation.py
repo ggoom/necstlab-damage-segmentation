@@ -176,7 +176,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
         # segmented_image.save(Path(output_dir, image_file.name).as_posix())
         # imsave(Path(output_dir, image_file.name).as_posix(), segmented_image)
 
-        run_validation_case(image, image_file.stem, output_dir.as_posix(), compiled_model, output_label_map=True, threshold=0.5)
+        run_validation_case(image, image_file.stem, output_dir.as_posix(), compiled_model, output_label_map=True, threshold=0.9)
 
     metadata = {
         'gcp_bucket': gcp_bucket,
