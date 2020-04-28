@@ -5,6 +5,8 @@ import yaml
 from datetime import datetime
 import pytz
 from PIL import Image, ImageOps
+from skimage.external.tifffile import imread, imsave
+
 from pathlib import Path
 import git
 from models import generate_compiled_segmentation_model, generate_compiled_3d_segmentation_model
@@ -163,11 +165,13 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         print('Segmenting image {} of {}...'.format(i, n_images))
 
-        image = Image.open(image_file)
+        # image = Image.open(image_file)
+        image = imread(image_file.as_posix())
 
         segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
-        segmented_image.save(Path(output_dir, image_file.name).as_posix())
+        # segmented_image.save(Path(output_dir, image_file.name).as_posix())
+        imsave(Path(output_dir, image_file.name).as_posix(), segmented_image)
 
     metadata = {
         'gcp_bucket': gcp_bucket,
