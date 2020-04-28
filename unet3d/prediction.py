@@ -100,7 +100,7 @@ def multi_class_prediction(prediction, affine):
     return prediction_images
 
 
-def run_validation_case(test_data, output_dir, model,
+def run_validation_case(test_data, file_name, output_dir, model,
                         output_label_map=False, threshold=0.5, labels=None, overlap=16, permute=False):
     """
     Runs a test case and writes predicted images to file.
@@ -138,7 +138,7 @@ def run_validation_case(test_data, output_dir, model,
         for i, image in enumerate(prediction_image):
             image.to_filename(os.path.join(output_dir, "prediction_{0}.tiff".format(i + 1)))
     else:
-        imsave(os.path.join(output_dir, "prediction.tiff"), prediction_image)
+        imsave(os.path.join(output_dir, file_name + "_prediction.tiff"), prediction_image)
 
 
 def run_validation_cases(validation_keys_file, model_file, training_modalities, labels, hdf5_file,

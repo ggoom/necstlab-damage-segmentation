@@ -169,14 +169,14 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
         # image = Image.open(image_file)
         image = imread(image_file.as_posix())
         image = image[np.newaxis, np.newaxis, :]
-        sys.stdout.write(str(image.shape))
+        # sys.stdout.write(str(image.shape))
 
         # segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
         # segmented_image.save(Path(output_dir, image_file.name).as_posix())
         # imsave(Path(output_dir, image_file.name).as_posix(), segmented_image)
 
-        run_validation_case(image, output_dir.as_posix(), compiled_model)
+        run_validation_case(image, image_file.stem, output_dir.as_posix(), compiled_model)
 
     metadata = {
         'gcp_bucket': gcp_bucket,
