@@ -10,6 +10,7 @@ from skimage.external.tifffile import imread, imsave
 from pathlib import Path
 import git
 from models import generate_compiled_segmentation_model, generate_compiled_3d_segmentation_model
+from unet3d.prediction import run_validation_case
 
 
 metadata_file_name = 'metadata.yaml'
@@ -168,10 +169,12 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
         # image = Image.open(image_file)
         image = imread(image_file.as_posix())
 
-        segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
+        # segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
         # segmented_image.save(Path(output_dir, image_file.name).as_posix())
-        imsave(Path(output_dir, image_file.name).as_posix(), segmented_image)
+        # imsave(Path(output_dir, image_file.name).as_posix(), segmented_image)
+
+        run_validation_case(image, output_dir.as_posix(), compiled_model)
 
     metadata = {
         'gcp_bucket': gcp_bucket,
