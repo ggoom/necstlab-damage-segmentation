@@ -96,7 +96,7 @@ def train(gcp_bucket, config_file):
 
         config["batch_size"] = 1
         config["validation_batch_size"] = 1
-        config["n_epochs"] = 5  # cutoff the training after this many epochs
+        config["n_epochs"] = 1  # cutoff the training after this many epochs
         config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
         config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
         config["initial_learning_rate"] = 0.00001
@@ -118,15 +118,10 @@ def train(gcp_bucket, config_file):
         training_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'train').as_posix()
         training_image_filenames = sorted(Path(training_dataset_directory, 'images').iterdir())
         training_mask_filenames = sorted(Path(training_dataset_directory, 'masks').iterdir())
-        sys.stdout.write("TRAINING IMAGES: " + str(len(training_image_filenames)))
-        sys.stdout.write("MASK IMAGES: " + str(len(training_mask_filenames)))
 
         training_data_files = [(image, mask) for image, mask in zip(training_image_filenames, training_mask_filenames)]
-        sys.stdout.write("training_data_files LEN: " + str(len(training_data_files)))
         write_data_to_file(training_data_files, config["training_data_file"], image_shape=config["image_shape"], crop=False)
         training_data_file_opened = open_data_file(config["training_data_file"])
-        sys.stdout.write("OPENED: " + str(training_data_file_opened) + "\n\n\n")
-        sys.stdout.write(str(len(list(training_data_file_opened))))
 
         validation_dataset_directory = Path(local_dataset_dir, train_config['dataset_id'], 'validation').as_posix()
         validation_image_filenames = sorted(Path(validation_dataset_directory, 'images').iterdir())
@@ -215,7 +210,7 @@ def train(gcp_bucket, config_file):
 
     model_checkpoint_callback = ModelCheckpoint(Path(model_dir, 'model.hdf5').as_posix(),
                                                 monitor='loss', verbose=1, save_best_only=True)
-    tensorboard_callback = TensorBoard(log_dir=logs_dir.as_posix(), batch_size=batch_size, write_graph=True,
+    tensorboard_callback = TensorBoard(log_dir=logs_dir.as_posix(), write_graph=True,
                                        write_grads=False, write_images=True, update_freq='epoch', profile_batch=0)
 
     # n_sample_images = 20

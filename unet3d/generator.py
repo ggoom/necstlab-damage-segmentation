@@ -52,7 +52,6 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
         validation_batch_size = batch_size
     training_list = list(range(data_file_training.root.data.shape[0]))
     validation_list = list(range(data_file_validation.root.data.shape[0]))
-    sys.stdout.write(str(training_list))
 
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
@@ -91,7 +90,6 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
 
 
 def get_number_of_steps(n_samples, batch_size):
-    sys.stdout.write("SAMPLES " + str(n_samples) + " batch size " + str(batch_size))
     if n_samples <= batch_size:
         return n_samples
     elif np.remainder(n_samples, batch_size) == 0:
