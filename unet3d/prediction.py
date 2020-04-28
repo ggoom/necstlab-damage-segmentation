@@ -3,7 +3,7 @@ import os
 import nibabel as nib
 import numpy as np
 import tables
-from scikit import imsave
+from skimage.external.tifffile import imread, imsave
 
 from .training import load_old_model
 from .utils import pickle_load
