@@ -207,7 +207,7 @@ def train(gcp_bucket, config_file):
         compiled_model = generate_compiled_3d_segmentation_model(
             (1, 20, 512, 512),  # config["image_shape"],
             n_labels=1,
-            n_base_filters=16,
+            n_base_filters=4,
             depth=2,
         )
 
