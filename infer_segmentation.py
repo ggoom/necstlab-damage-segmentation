@@ -168,7 +168,8 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         # image = Image.open(image_file)
         image = imread(image_file.as_posix())
-        sys.stdout.write(image.shape)
+        image = image[np.newaxis, np.newaxis, :]
+        sys.stdout.write(str(image.shape))
 
         # segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
