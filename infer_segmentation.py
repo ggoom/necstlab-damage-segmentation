@@ -11,7 +11,7 @@ from pathlib import Path
 import git
 from models import generate_compiled_segmentation_model, generate_compiled_3d_segmentation_model
 from unet3d.prediction import run_validation_case
-
+import sys
 
 metadata_file_name = 'metadata.yaml'
 tmp_directory = Path('./tmp')
@@ -168,6 +168,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
 
         # image = Image.open(image_file)
         image = imread(image_file.as_posix())
+        sys.stdout.write(image.shape)
 
         # segmented_image = segment_image(compiled_model, image, prediction_threshold, target_size_1d)
 
