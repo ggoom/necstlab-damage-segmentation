@@ -238,7 +238,7 @@ def train(gcp_bucket, config_file):
         validation_data=validation_generator,
         validation_steps=n_validation_steps if generator_type == '3D' else (len(
             validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps']),
-        callbacks=[tensorboard_callback]
+        # callbacks=[tensorboard_callback]
     )
 
     metric_names = ['loss'] + [m.name for m in compiled_model.metrics]
