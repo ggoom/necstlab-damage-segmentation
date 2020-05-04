@@ -1,6 +1,8 @@
 import numpy as np
 import nibabel as nib
 from nilearn.image import new_img_like, resample_to_img
+from skimage.external.tifffile import imread, imsave
+
 import random
 import itertools
 
@@ -59,14 +61,18 @@ def augment_data(data, truth, affine, scale_deviation=None, flip=True):
         flip_axis = None
     data_list = list()
     for data_index in range(data.shape[0]):
-        image = get_image(data[data_index], affine)
-        data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
-                                                       scale_factor=scale_factor), image,
-                                         interpolation="continuous"))
+        # image = get_image(data[data_index], affine)
+        image = data[data_index]
+        # data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
+        #                                                scale_factor=scale_factor), image,
+        #                                  interpolation="continuous"))
+        data_list.append(distort_image(image, flip_axis=flip_axis, scale_factor=None))
     data = np.asarray(data_list)
-    truth_image = get_image(truth, affine)
-    truth_data = resample_to_img(distort_image(truth_image, flip_axis=flip_axis, scale_factor=scale_factor),
-                                 truth_image, interpolation="nearest")
+    # truth_image = get_image(truth, affine)
+    truth_image = truth
+    # truth_data = resample_to_img(distort_image(truth_image, flip_axis=flip_axis, scale_factor=scale_factor),
+    #                              truth_image, interpolation="nearest")
+    truth_data = distort_image(truth_image, flip_axis=flip_axis, scale_factor=None)
     return data, truth_data
 
 
