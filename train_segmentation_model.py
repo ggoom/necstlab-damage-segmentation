@@ -72,7 +72,7 @@ def train(gcp_bucket, config_file):
 
     target_size = dataset_config['target_size']
     batch_size = train_config['batch_size']
-    # epochs = 5
+    # epochs = 10
     generator_type = train_config['generator_type']
     augmentation_type = train_config['data_augmentation']['augmentation_type']
 
@@ -97,6 +97,7 @@ def train(gcp_bucket, config_file):
         config["batch_size"] = 1
         config["validation_batch_size"] = 1
         config["n_epochs"] = 10  # cutoff the training after this many epochs
+        epochs = config["n_epochs"]
         config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
         config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
         config["initial_learning_rate"] = 0.00001
