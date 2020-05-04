@@ -22,7 +22,8 @@ def flip_image(image, axis):
             new_data = np.flip(new_data, axis=axis_index)
     except TypeError:
         new_data = np.flip(image, axis=axis)
-    return new_img_like(image, data=new_data)
+    # return new_img_like(image, data=new_data)
+    return new_data
 
 
 def random_flip_dimensions(n_dimensions):
