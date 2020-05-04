@@ -210,7 +210,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         #     affine = data_file.root.affine[index[0]]
         # else:
         #     affine = data_file.root.affine[index]
-        data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
+        data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
@@ -219,10 +219,13 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         data, truth = random_permutation_x_y(data, truth[np.newaxis])
     else:
         truth = truth[np.newaxis]
+        truth_augment = truth[np.newaxis]
 
     if not skip_blank or np.any(truth != 0):
         x_list.append(data)
         y_list.append(truth)
+        x_list.append(data_augment)
+        y_list.append(truth_augment)
 
 
 def get_data_from_file(data_file, index, patch_shape=None):

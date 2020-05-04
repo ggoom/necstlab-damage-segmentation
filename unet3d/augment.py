@@ -2,6 +2,7 @@ import numpy as np
 import nibabel as nib
 from nilearn.image import new_img_like, resample_to_img
 from skimage.external.tifffile import imread, imsave
+import sys
 
 import random
 import itertools
@@ -52,12 +53,14 @@ def distort_image(image, flip_axis=None, scale_factor=None):
 
 def augment_data(data, truth, scale_deviation=None, flip=True):
     n_dim = len(truth.shape)
+    sys.stdout.write("data shape: " + str(data.shape) + ", truth shape: " + str(truth.shape))
     if scale_deviation:
         scale_factor = random_scale_factor(n_dim, std=scale_deviation)
     else:
         scale_factor = None
     if flip:
         flip_axis = random_flip_dimensions(n_dim)
+        sys.stdout.write("flip axis: " + str(flip_axis))
     else:
         flip_axis = None
     data_list = list()
