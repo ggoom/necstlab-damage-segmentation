@@ -202,7 +202,7 @@ def train(gcp_bucket, config_file):
         compiled_model = generate_compiled_3d_segmentation_model(
             (1, 20, 512, 512),  # config["image_shape"],
             n_labels=1,
-            n_base_filters=4,
+            n_base_filters=12,
             depth=2,
         )
 
@@ -297,7 +297,8 @@ def train(gcp_bucket, config_file):
         'original_config_filename': config_file,
         'elapsed_minutes': round((datetime.now() - start_dt).total_seconds() / 60, 1),
         'dataset_config': dataset_config,
-        'train_config': train_config
+        'train_config': train_config,
+        '3d_config': config,
     }
 
     with Path(model_dir, metadata_file_name).open('w') as f:

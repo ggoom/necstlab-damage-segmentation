@@ -154,7 +154,7 @@ def main(gcp_bucket, stack_id, model_id, prediction_threshold):
         compiled_model = generate_compiled_3d_segmentation_model(
             (1, 20, 512, 512),  # config["image_shape"],
             n_labels=1,
-            n_base_filters=4,
+            n_base_filters=12,
             depth=2,
             weights_to_load=Path(local_model_dir, "model.hdf5").as_posix()
         )
