@@ -50,8 +50,8 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
     """
     if not validation_batch_size:
         validation_batch_size = batch_size
-    training_list = list(range(data_file_training.root.data.shape[0]))
-    validation_list = list(range(data_file_validation.root.data.shape[0]))
+    training_list = list(range(data_file_training.root.data.shape[0] * 2))
+    validation_list = list(range(data_file_validation.root.data.shape[0] * 2))
 
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
