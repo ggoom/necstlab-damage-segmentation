@@ -96,7 +96,7 @@ def train(gcp_bucket, config_file):
 
         config["batch_size"] = 1
         config["validation_batch_size"] = 1
-        config["n_epochs"] = 10  # cutoff the training after this many epochs
+        config["n_epochs"] = 1  # cutoff the training after this many epochs
         epochs = config["n_epochs"]
         config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
         config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
