@@ -94,7 +94,7 @@ def train(gcp_bucket, config_file):
         config["truth_channel"] = config["nb_channels"]
         config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
 
-        config["batch_size"] = 1
+        config["batch_size"] = 2
         config["validation_batch_size"] = 1
         config["n_epochs"] = 1  # cutoff the training after this many epochs
         epochs = config["n_epochs"]
