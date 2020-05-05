@@ -244,7 +244,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         truth_augment = truth_augment[np.newaxis]
 
     if not skip_blank or np.any(truth != 0):
-        pdb.set_trace()
+        # pdb.set_trace()
         x_list.append(data)
         y_list.append(truth)
         if augment:
