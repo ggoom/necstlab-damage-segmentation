@@ -153,8 +153,9 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
         shuffle(x_list)
         shuffle(y_list)
 
-        # augmented_index_list = list(range(len(index_list) * 2))
-        # shuffle(augmented_index_list)
+        augmented_index_list = list(range(len(index_list) * 2))
+        shuffle(augmented_index_list)
+        index_list = augmented_index_list
         while len(index_list) > 0:
             index = index_list.pop()
             x_data = x_list[index]
@@ -165,7 +166,7 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
             # ylist.append(y_data)
             # pdb.set_trace()
             # yield convert_data([x_data, ], [y_data, ], n_labels=n_labels, labels=labels)
-            yield np.asarray(x_data), np.asarray(y_data)
+            yield np.asarray([x_data, ]), np.asarray([y_data, ])
 
             # if len(x_list) == batch_size or (len(index_list) == 0 and len(x_list) > 0):
             #     yield convert_data(x_list, y_list, n_labels=n_labels, labels=labels)
