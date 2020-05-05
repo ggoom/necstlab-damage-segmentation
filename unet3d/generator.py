@@ -240,9 +240,9 @@ def get_data_from_file(data_file, index, patch_shape=None):
 
 
 def convert_data(x_list, y_list, n_labels=1, labels=None):
-    sys.stdout.write(str(x_list))
+    sys.stdout.write(str(type(x_list)))
     x = np.asarray(x_list)
-    sys.stdout.write(str(x))
+    sys.stdout.write(str(type(x)))
     y = np.asarray(y_list)
     if n_labels == 1:
         y[y > 0] = 1
