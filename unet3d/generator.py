@@ -244,10 +244,10 @@ def convert_data(x_list, y_list, n_labels=1, labels=None):
     # pdb.set_trace()
     x = np.asarray(x_list)
     y = np.asarray(y_list)
-    if n_labels == 1:
-        y[y > 0] = 1
-    elif n_labels > 1:
-        y = get_multi_class_labels(y, n_labels=n_labels, labels=labels)
+    # if n_labels == 1:
+    #     y[y > 0] = 1
+    # elif n_labels > 1:
+    #     y = get_multi_class_labels(y, n_labels=n_labels, labels=labels)
     return x, y
 
 
