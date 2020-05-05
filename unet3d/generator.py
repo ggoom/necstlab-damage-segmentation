@@ -239,7 +239,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         data, truth = random_permutation_x_y(data, truth[np.newaxis])
     else:
         truth = truth[np.newaxis]
-        truth_augment = truth[np.newaxis]
+        # truth_augment = truth[np.newaxis]
 
     if not skip_blank or np.any(truth != 0):
         pdb.set_trace()
