@@ -241,7 +241,7 @@ def get_data_from_file(data_file, index, patch_shape=None):
 
 
 def convert_data(x_list, y_list, n_labels=1, labels=None):
-    pdb.set_trace()
+    # pdb.set_trace()
     x = np.asarray(x_list)
     y = np.asarray(y_list)
     if n_labels == 1:
