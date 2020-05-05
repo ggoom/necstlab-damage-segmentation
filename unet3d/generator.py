@@ -153,9 +153,9 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
         shuffle(x_list)
         shuffle(y_list)
 
-        # augmented_index_list = list(range(len(index_list) * 2))
-        # shuffle(augmented_index_list)
-        # index_list = augmented_index_list
+        augmented_index_list = list(range(len(index_list) * 2))
+        shuffle(augmented_index_list)
+        index_list = augmented_index_list
         while len(index_list) > 0:
             index = index_list.pop()
             x_data = x_list[index]
