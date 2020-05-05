@@ -134,9 +134,9 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
                    augment_distortion_factor=0.25, patch_shape=None, patch_overlap=0, patch_start_offset=None,
                    shuffle_index_list=True, skip_blank=True, permute=False):
     orig_index_list = index_list
+    x_list = list()
+    y_list = list()
     while True:
-        x_list = list()
-        y_list = list()
         if patch_shape:
             index_list = create_patch_index_list(orig_index_list, data_file.root.data.shape[-3:], patch_shape,
                                                  patch_overlap, patch_start_offset)
