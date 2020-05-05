@@ -146,6 +146,7 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
         if shuffle_index_list:
             shuffle(index_list)
         while len(index_list) > 0:
+            sys.stdout.write("helloo")
             index = index_list.pop()
             add_data(x_list, y_list, data_file, index, augment=augment, augment_flip=augment_flip,
                      augment_distortion_factor=augment_distortion_factor, patch_shape=patch_shape,
@@ -204,6 +205,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
     :param permute: will randomly permute the data (data must be 3D cube)
     :return:
     """
+    sys.stdout.write("***************** augment parameter: " + str(augment))
     data, truth = get_data_from_file(data_file, index, patch_shape=patch_shape)
     if augment:
         # if patch_shape is not None:
