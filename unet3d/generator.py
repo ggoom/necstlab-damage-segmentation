@@ -50,8 +50,8 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
     """
     if not validation_batch_size:
         validation_batch_size = batch_size
-    training_list = list(range(data_file_training.root.data.shape[0] * 2))
-    validation_list = list(range(data_file_validation.root.data.shape[0] * 2))
+    training_list = list(range(data_file_training.root.data.shape[0]))
+    validation_list = list(range(data_file_validation.root.data.shape[0]))
 
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
@@ -74,16 +74,16 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
                                           skip_blank=skip_blank)
 
     # Set the number of training and testing samples per epoch correctly
-    num_training_steps = get_number_of_steps(get_number_of_patches(data_file_training, training_list, patch_shape,
-                                                                   skip_blank=skip_blank,
-                                                                   patch_start_offset=training_patch_start_offset,
-                                                                   patch_overlap=0), batch_size)
+    num_training_steps = 2 * get_number_of_steps(get_number_of_patches(data_file_training, training_list, patch_shape,
+                                                                       skip_blank=skip_blank,
+                                                                       patch_start_offset=training_patch_start_offset,
+                                                                       patch_overlap=0), batch_size)
     print("Number of training steps: ", num_training_steps)
 
-    num_validation_steps = get_number_of_steps(get_number_of_patches(data_file_validation, validation_list, patch_shape,
-                                                                     skip_blank=skip_blank,
-                                                                     patch_overlap=validation_patch_overlap),
-                                               validation_batch_size)
+    num_validation_steps = 2 * get_number_of_steps(get_number_of_patches(data_file_validation, validation_list, patch_shape,
+                                                                         skip_blank=skip_blank,
+                                                                         patch_overlap=validation_patch_overlap),
+                                                   validation_batch_size)
     print("Number of validation steps: ", num_validation_steps)
 
     return training_generator, validation_generator, num_training_steps, num_validation_steps
