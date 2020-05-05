@@ -166,6 +166,8 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
             # ylist.append(y_data)
             pdb.set_trace()
             # yield convert_data([x_data, ], [y_data, ], n_labels=n_labels, labels=labels)
+            assert x_data[np.newaxis].shape == (1, 1, 20, 512, 512)
+            assert y_data[np.newaxis].shape == (1, 1, 20, 512, 512)
             yield x_data[np.newaxis], y_data[np.newaxis]
 
             # if len(x_list) == batch_size or (len(index_list) == 0 and len(x_list) > 0):

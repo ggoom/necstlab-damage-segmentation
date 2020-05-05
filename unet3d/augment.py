@@ -59,23 +59,22 @@ def augment_data(data, truth, scale_deviation=None, flip=True):
         scale_factor = None
     if flip:
         flip_axis = random_flip_dimensions(n_dim)
-        sys.stdout.write("flip axis: " + str(flip_axis))
     else:
         flip_axis = None
     # data_list = list()
     # for data_index in range(data.shape[0]):
         # image = get_image(data[data_index], affine)
-    image = data
+    # image = data
     # data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
     #                                                scale_factor=scale_factor), image,
     #                                  interpolation="continuous"))
-    augmentation = distort_image(image, flip_axis=flip_axis, scale_factor=None)
+    augmentation = distort_image(data, flip_axis=flip_axis, scale_factor=None)
     # data = np.asarray(augmentation)
     # truth_image = get_image(truth, affine)
-    truth_image = truth
+    # truth_image = truth
     # truth_data = resample_to_img(distort_image(truth_image, flip_axis=flip_axis, scale_factor=scale_factor),
     #                              truth_image, interpolation="nearest")
-    truth_data = distort_image(truth_image, flip_axis=flip_axis, scale_factor=None)
+    truth_data = distort_image(truth, flip_axis=flip_axis, scale_factor=None)
     return augmentation, truth_data
 
 
