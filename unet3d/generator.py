@@ -52,7 +52,6 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
         validation_batch_size = batch_size
     training_list = list(range(data_file_training.root.data.shape[0]))
     validation_list = list(range(data_file_validation.root.data.shape[0]))
-    sys.stdout.write("hello ^^^^^^^^^^ augment parameter: " + str(augment) + " \n")
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
                                         n_labels=n_labels,
@@ -146,7 +145,6 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
         if shuffle_index_list:
             shuffle(index_list)
         while len(index_list) > 0:
-            sys.stdout.write("helloo @@@@@@@@@ augment parameter: " + str(augment) + " \n")
             index = index_list.pop()
             add_data(x_list, y_list, data_file, index, augment=augment, augment_flip=augment_flip,
                      augment_distortion_factor=augment_distortion_factor, patch_shape=patch_shape,
@@ -205,16 +203,13 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
     :param permute: will randomly permute the data (data must be 3D cube)
     :return:
     """
-    sys.stdout.write("***************** augment parameter: " + str(augment))
     data, truth = get_data_from_file(data_file, index, patch_shape=patch_shape)
     if augment:
         # if patch_shape is not None:
         #     affine = data_file.root.affine[index[0]]
         # else:
         #     affine = data_file.root.affine[index]
-        sys.stdout.write("hello before data augment \n")
         data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
-        sys.stdout.write("hello after data augment \n")
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
@@ -245,7 +240,9 @@ def get_data_from_file(data_file, index, patch_shape=None):
 
 
 def convert_data(x_list, y_list, n_labels=1, labels=None):
+    sys.stdout.write(str(x_list))
     x = np.asarray(x_list)
+    sys.stdout.write(str(x))
     y = np.asarray(y_list)
     if n_labels == 1:
         y[y > 0] = 1
