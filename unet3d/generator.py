@@ -78,14 +78,12 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
                                                                        skip_blank=skip_blank,
                                                                        patch_start_offset=training_patch_start_offset,
                                                                        patch_overlap=0), batch_size)
-    num_training_steps = 20
     print("Number of training steps: ", num_training_steps)
 
     num_validation_steps = 2 * get_number_of_steps(get_number_of_patches(data_file_validation, validation_list, patch_shape,
                                                                          skip_blank=skip_blank,
                                                                          patch_overlap=validation_patch_overlap),
                                                    validation_batch_size)
-    num_validation_steps = 10
     print("Number of validation steps: ", num_validation_steps)
 
     return training_generator, validation_generator, num_training_steps, num_validation_steps
@@ -234,7 +232,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         # else:
         #     affine = data_file.root.affine[index]
         sys.stdout.write("augmentation for index " + str(index) + "\n")
-    data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
+        data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
@@ -243,7 +241,8 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         data, truth = random_permutation_x_y(data, truth[np.newaxis])
     else:
         truth = truth[np.newaxis]
-        truth_augment = truth_augment[np.newaxis]
+        if augment:
+            truth_augment = truth_augment[np.newaxis]
 
     if not skip_blank or np.any(truth != 0):
         # pdb.set_trace()
