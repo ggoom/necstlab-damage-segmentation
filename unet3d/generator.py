@@ -232,7 +232,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         # else:
         #     affine = data_file.root.affine[index]
         sys.stdout.write("augmentation for index " + str(index) + "\n")
-        data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
+    data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
