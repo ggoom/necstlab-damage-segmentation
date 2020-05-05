@@ -53,7 +53,6 @@ def distort_image(image, flip_axis=None, scale_factor=None):
 
 def augment_data(data, truth, scale_deviation=None, flip=True):
     n_dim = len(truth.shape)
-    sys.stdout.write("data shape: " + str(data.shape) + ", truth shape: " + str(truth.shape))
     if scale_deviation:
         scale_factor = random_scale_factor(n_dim, std=scale_deviation)
     else:
