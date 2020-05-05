@@ -52,7 +52,7 @@ def get_training_and_validation_generators(data_file_training, data_file_validat
         validation_batch_size = batch_size
     training_list = list(range(data_file_training.root.data.shape[0]))
     validation_list = list(range(data_file_validation.root.data.shape[0]))
-
+    sys.stdout.write("hello ^^^^^^^^^^ augment parameter: " + str(augment) + " \n")
     training_generator = data_generator(data_file_training, training_list,
                                         batch_size=batch_size,
                                         n_labels=n_labels,
@@ -146,7 +146,7 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
         if shuffle_index_list:
             shuffle(index_list)
         while len(index_list) > 0:
-            sys.stdout.write("helloo")
+            sys.stdout.write("helloo @@@@@@@@@ augment parameter: " + str(augment) + " \n")
             index = index_list.pop()
             add_data(x_list, y_list, data_file, index, augment=augment, augment_flip=augment_flip,
                      augment_distortion_factor=augment_distortion_factor, patch_shape=patch_shape,

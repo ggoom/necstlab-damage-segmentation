@@ -105,7 +105,7 @@ def train(gcp_bucket, config_file):
         config["validation_split"] = 0.8  # portion of the data that will be used for training
         config["flip"] = True  # augments the data by randomly flipping an axis during
         config["permute"] = False  # data shape must be a cube. Augments the data by permuting in various directions
-        config["distort"] = None  # switch to None if you want no distortion
+        config["distort"] = False  # switch to None if you want no distortion
         config["augment"] = config["flip"] or config["distort"]
         config["validation_patch_overlap"] = 0  # if > 0, during training, validation patches will be overlapping
         config["training_patch_start_offset"] = (16, 16, 16)  # randomly offset the first patch index by up to this offset
