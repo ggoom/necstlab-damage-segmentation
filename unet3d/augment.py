@@ -17,6 +17,7 @@ def scale_image(image, scale_factor):
 
 
 def flip_image(image, axis):
+    sys.stdout.write("flipping\n")
     try:
         new_data = np.copy(image)
         for axis_index in axis:
