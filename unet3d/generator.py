@@ -164,7 +164,7 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
             # xlist.append(x_data)
             # ylist = []
             # ylist.append(y_data)
-            # pdb.set_trace()
+            pdb.set_trace()
             # yield convert_data([x_data, ], [y_data, ], n_labels=n_labels, labels=labels)
             yield x_data[np.newaxis], y_data[np.newaxis]
 

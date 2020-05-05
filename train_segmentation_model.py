@@ -103,7 +103,7 @@ def train(gcp_bucket, config_file):
         config["initial_learning_rate"] = 0.00001
         config["learning_rate_drop"] = 0.5  # factor by which the learning rate will be reduced
         config["validation_split"] = 0.8  # portion of the data that will be used for training
-        config["flip"] = False  # augments the data by randomly flipping an axis during
+        config["flip"] = True  # augments the data by randomly flipping an axis during
         config["permute"] = False  # data shape must be a cube. Augments the data by permuting in various directions
         config["distort"] = False  # switch to None if you want no distortion
         config["augment"] = config["flip"] or config["distort"]

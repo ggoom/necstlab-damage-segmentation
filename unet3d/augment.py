@@ -65,7 +65,7 @@ def augment_data(data, truth, scale_deviation=None, flip=True):
     # data_list = list()
     # for data_index in range(data.shape[0]):
         # image = get_image(data[data_index], affine)
-    image = data[0]
+    image = data
     # data_list.append(resample_to_img(distort_image(image, flip_axis=flip_axis,
     #                                                scale_factor=scale_factor), image,
     #                                  interpolation="continuous"))
