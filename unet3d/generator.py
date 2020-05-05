@@ -211,7 +211,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         #     affine = data_file.root.affine[index[0]]
         # else:
         #     affine = data_file.root.affine[index]
-        # sys.stdout.write("augmentation for index " + str(index) + "\n")
+        sys.stdout.write("augmentation for index " + str(index) + "\n")
         data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
@@ -243,8 +243,9 @@ def convert_data(x_list, y_list, n_labels=1, labels=None):
     # pdb.set_trace()
     x = np.asarray(x_list)
     y = np.asarray(y_list)
-    # if n_labels == 1:
-    #     y[y > 0] = 1
+    sys.stdout.write(str(np.amax(y)) + "\n")
+    if n_labels == 1:
+        y[y > 0] = 1
     # elif n_labels > 1:
     #     y = get_multi_class_labels(y, n_labels=n_labels, labels=labels)
     return x, y
