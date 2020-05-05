@@ -133,10 +133,11 @@ def split_list(input_list, split=0.8, shuffle_list=True):
 def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None, augment=False, augment_flip=True,
                    augment_distortion_factor=0.25, patch_shape=None, patch_overlap=0, patch_start_offset=None,
                    shuffle_index_list=True, skip_blank=True, permute=False):
+
     orig_index_list = index_list
-    x_list = list()
-    y_list = list()
     while True:
+        x_list = list()
+        y_list = list()
         if patch_shape:
             index_list = create_patch_index_list(orig_index_list, data_file.root.data.shape[-3:], patch_shape,
                                                  patch_overlap, patch_start_offset)
@@ -145,36 +146,15 @@ def data_generator(data_file, index_list, batch_size=1, n_labels=1, labels=None,
 
         if shuffle_index_list:
             shuffle(index_list)
-
-        for index in index_list:  # number of original files
+        while len(index_list) > 0:
+            index = index_list.pop()
             add_data(x_list, y_list, data_file, index, augment=augment, augment_flip=augment_flip,
                      augment_distortion_factor=augment_distortion_factor, patch_shape=patch_shape,
                      skip_blank=skip_blank, permute=permute)
-        shuffle(x_list)
-        shuffle(y_list)
-
-        augmented_index_list = list(range(len(index_list) * 2))
-        shuffle(augmented_index_list)
-        index_list = augmented_index_list
-        sys.stdout.write(str(index_list))
-        while len(index_list) > 0:
-            index = index_list.pop()
-            x_data = x_list[index]
-            y_data = y_list[index]
-            # xlist = []
-            # xlist.append(x_data)
-            # ylist = []
-            # ylist.append(y_data)
-            # pdb.set_trace()
-            # yield convert_data([x_data, ], [y_data, ], n_labels=n_labels, labels=labels)
-            assert x_data[np.newaxis].shape == (1, 1, 20, 512, 512)
-            assert y_data[np.newaxis].shape == (1, 1, 20, 512, 512)
-            yield x_data[np.newaxis], y_data[np.newaxis]
-
-            # if len(x_list) == batch_size or (len(index_list) == 0 and len(x_list) > 0):
-            #     yield convert_data(x_list, y_list, n_labels=n_labels, labels=labels)
-            #     x_list = list()
-            #     y_list = list()
+            if len(x_list) == batch_size or (len(index_list) == 0 and len(x_list) > 0):
+                yield convert_data(x_list, y_list, n_labels=n_labels, labels=labels)
+                x_list = list()
+                y_list = list()
 
 
 def get_number_of_patches(data_file, index_list, patch_shape=None, patch_overlap=0, patch_start_offset=None,
@@ -231,8 +211,8 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         #     affine = data_file.root.affine[index[0]]
         # else:
         #     affine = data_file.root.affine[index]
-        sys.stdout.write("augmentation for index " + str(index) + "\n")
-        data_augment, truth_augment = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
+        # sys.stdout.write("augmentation for index " + str(index) + "\n")
+        data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
@@ -241,16 +221,11 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         data, truth = random_permutation_x_y(data, truth[np.newaxis])
     else:
         truth = truth[np.newaxis]
-        if augment:
-            truth_augment = truth_augment[np.newaxis]
 
     if not skip_blank or np.any(truth != 0):
         # pdb.set_trace()
         x_list.append(data)
         y_list.append(truth)
-        if augment:
-            x_list.append(data_augment)
-            y_list.append(truth_augment)
 
 
 def get_data_from_file(data_file, index, patch_shape=None):
