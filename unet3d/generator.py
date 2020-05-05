@@ -206,13 +206,6 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
     :return:
     """
     data, truth = get_data_from_file(data_file, index, patch_shape=patch_shape)
-    if augment:
-        # if patch_shape is not None:
-        #     affine = data_file.root.affine[index[0]]
-        # else:
-        #     affine = data_file.root.affine[index]
-        sys.stdout.write("augmentation for index " + str(index) + "\n")
-        data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if permute:
         if data.shape[-3] != data.shape[-2] or data.shape[-2] != data.shape[-1]:
@@ -221,6 +214,14 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
         data, truth = random_permutation_x_y(data, truth[np.newaxis])
     else:
         truth = truth[np.newaxis]
+
+    if augment:
+            # if patch_shape is not None:
+            #     affine = data_file.root.affine[index[0]]
+            # else:
+            #     affine = data_file.root.affine[index]
+        sys.stdout.write("augmentation for index " + str(index) + "\n")
+        data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if not skip_blank or np.any(truth != 0):
         # pdb.set_trace()
