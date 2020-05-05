@@ -5,6 +5,7 @@ import itertools
 
 import numpy as np
 import sys
+import pdb
 
 from unet3d.utils import pickle_dump, pickle_load
 from unet3d.utils.patches import compute_patch_indices, get_random_nd_index, get_patch_from_3d_data
@@ -240,9 +241,8 @@ def get_data_from_file(data_file, index, patch_shape=None):
 
 
 def convert_data(x_list, y_list, n_labels=1, labels=None):
-    sys.stdout.write(str(type(x_list)))
+    pdb.set_trace()
     x = np.asarray(x_list)
-    sys.stdout.write(str(type(x)))
     y = np.asarray(y_list)
     if n_labels == 1:
         y[y > 0] = 1
