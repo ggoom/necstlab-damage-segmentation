@@ -96,7 +96,7 @@ def train(gcp_bucket, config_file):
 
         config["batch_size"] = 1
         config["validation_batch_size"] = 1
-        config["n_epochs"] = 5  # cutoff the training after this many epochs
+        config["n_epochs"] = 2  # cutoff the training after this many epochs
         epochs = config["n_epochs"]
         config["patience"] = 10  # learning rate will be reduced after this many epochs if the validation loss is not improving
         config["early_stop"] = 50  # training will be stopped after this many epochs without the validation loss improving
@@ -226,14 +226,14 @@ def train(gcp_bucket, config_file):
 
     results = compiled_model.fit(
         train_generator,
-        # steps_per_epoch=n_train_steps if generator_type == '3D' else (len(train_generator) if augmentation_type ==
-        #                                                               'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch']),
+        steps_per_epoch=n_train_steps if generator_type == '3D' else (len(train_generator) if augmentation_type ==
+                                                                      'necstlab' else train_config['data_augmentation']['bio_augmentation']['steps_per_epoch']),
         workers=1,
         epochs=epochs,
         verbose=1,
         validation_data=validation_generator,
-        # validation_steps=n_validation_steps if generator_type == '3D' else (len(
-        #     validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps']),
+        validation_steps=n_validation_steps if generator_type == '3D' else (len(
+            validation_generator) if augmentation_type == 'necstlab' else train_config['data_augmentation']['bio_augmentation']['validation_steps']),
         callbacks=[model_checkpoint_callback]
     )
 
