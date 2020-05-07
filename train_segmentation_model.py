@@ -94,7 +94,7 @@ def train(gcp_bucket, config_file):
         config["truth_channel"] = config["nb_channels"]
         config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
 
-        config["batch_size"] = 1
+        config["batch_size"] = 2
         config["validation_batch_size"] = 1
         config["n_epochs"] = 2  # cutoff the training after this many epochs
         epochs = config["n_epochs"]
@@ -103,7 +103,7 @@ def train(gcp_bucket, config_file):
         config["initial_learning_rate"] = 0.00001
         config["learning_rate_drop"] = 0.5  # factor by which the learning rate will be reduced
         config["validation_split"] = 0.8  # portion of the data that will be used for training
-        config["flip"] = True  # augments the data by randomly flipping an axis during
+        config["flip"] = False  # augments the data by randomly flipping an axis during
         config["permute"] = False  # data shape must be a cube. Augments the data by permuting in various directions
         config["distort"] = False  # switch to None if you want no distortion
         config["augment"] = config["flip"] or config["distort"]

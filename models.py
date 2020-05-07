@@ -57,7 +57,7 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
     :param depth: indicates the depth of the U-shape for the model. The greater the depth, the more max pooling
     layers will be added to the model. Lowering the depth may reduce the amount of memory required for training.
     :param input_shape: Shape of the input data (n_chanels, x_size, y_size, z_size). The x, y, and z sizes must be
-    divisible by the pool size to the power of the depth of the UNet, that is pool_size^depth.
+    divisible by the pool size to the power of the depth of the UNet, that is pool_size^depth. (2,2,2)^2 | (20, 512, 512)
     :param pool_size: Pool size for the max pooling operations.
     :param n_labels: Number of binary labels that the model is learning.
     :param initial_learning_rate: Initial learning rate for the model. This will be decayed during training.
