@@ -46,7 +46,7 @@ def train(gcp_bucket, config_file):
         pass
     tmp_directory.mkdir()
 
-    local_dataset_dir = Path('dendrites3d', 'datasets')
+    local_dataset_dir = Path('dendrites3d128', 'datasets')
     # GOOFYS mounted bucket replaced this
     # local_dataset_dir = Path(tmp_directory, 'datasets')
     # copy_folder_locally_if_missing(os.path.join(gcp_bucket, 'datasets', train_config['dataset_id']),
