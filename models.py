@@ -10,7 +10,7 @@ from tensorflow.keras import Input
 from tensorflow.keras.models import Model
 from tensorflow.python.keras.layers import Conv3D, MaxPooling3D, UpSampling3D, Activation, BatchNormalization, PReLU, Conv3DTranspose as Deconvolution3D
 
-from unet3d.metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
+from unet3d.metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient, iou_coef_loss
 
 K.set_image_data_format("channels_first")
 
@@ -107,7 +107,7 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
         else:
             metrics = label_wise_dice_metrics
 
-    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=dice_coefficient_loss, metrics=metrics)
+    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=iou_coef_loss, metrics=metrics)
 
     if weights_to_load:
         model.load_weights(weights_to_load)
