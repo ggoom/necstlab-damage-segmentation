@@ -1,6 +1,6 @@
 train_config:
   model_id_prefix: 'segmentation-model-small'
-  dataset_id: 'dataset-dendrites3d'
+  dataset_id: 'dataset-dendrites3d128'
   segmentation_model:
     model_name: 'Unet'
     model_parameters:
