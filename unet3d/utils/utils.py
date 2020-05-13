@@ -56,7 +56,7 @@ def read_image_files(image_files, image_shape=None, crop=None, label_indices=Non
 def read_image(in_file, image_shape=None, interpolation='linear', crop=None):
     print("Reading: {0}".format(in_file))
     image = imread(in_file.as_posix())
-    sys.stdout.write(str(in_file) + str(np.ptp(image)) + "\n")
+    # sys.stdout.write(str(in_file) + str(np.ptp(image)) + "\n")
     # image = fix_shape(image)
     if crop:
         # image = crop_img_to(image, crop, copy=True)

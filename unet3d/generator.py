@@ -220,7 +220,7 @@ def add_data(x_list, y_list, data_file, index, augment=False, augment_flip=False
             #     affine = data_file.root.affine[index[0]]
             # else:
             #     affine = data_file.root.affine[index]
-        sys.stdout.write("augmentation for index " + str(index) + "\n")
+        # sys.stdout.write("augmentation for index " + str(index) + "\n")
         data, truth = augment_data(data, truth, flip=augment_flip, scale_deviation=augment_distortion_factor)
 
     if not skip_blank or np.any(truth != 0):
@@ -244,11 +244,11 @@ def convert_data(x_list, y_list, n_labels=1, labels=None):
     # pdb.set_trace()
     x = np.asarray(x_list)
     y = np.asarray(y_list)
-    sys.stdout.write(str(np.ptp(y)) + "\n")
+    # sys.stdout.write(str(np.ptp(y)) + "\n")
     if n_labels == 1:
         y[y > 0] = 1
         y[y < 1] = 0
-    sys.stdout.write(str(np.ptp(y)) + "\n")
+    # sys.stdout.write(str(np.ptp(y)) + "\n")
     # elif n_labels > 1:
     #     y = get_multi_class_labels(y, n_labels=n_labels, labels=labels)
     return x, y
