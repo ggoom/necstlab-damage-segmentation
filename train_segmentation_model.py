@@ -8,6 +8,7 @@ from datetime import datetime
 import pytz
 import matplotlib.pyplot as plt
 from tensorflow.python.keras.callbacks import ModelCheckpoint, TensorBoard, CSVLogger
+import tensorflow as tf
 from image_utils import TensorBoardImage, ImagesAndMasksGenerator, trainGenerator
 import git
 from gcp_utils import copy_folder_locally_if_missing
@@ -94,7 +95,7 @@ def train(gcp_bucket, config_file):
         config["truth_channel"] = config["nb_channels"]
         config["deconvolution"] = True  # if False, will use upsampling instead of deconvolution
 
-        config["batch_size"] = 2
+        config["batch_size"] = 1
         config["validation_batch_size"] = 1
         config["n_epochs"] = 2  # cutoff the training after this many epochs
         epochs = config["n_epochs"]
@@ -205,6 +206,7 @@ def train(gcp_bucket, config_file):
             n_labels=1,
             n_base_filters=12,
             depth=2,
+            metrics=[tf.keras.metrics.MeanIoU(num_classes=1)]
         )
 
         print(compiled_model.summary())
