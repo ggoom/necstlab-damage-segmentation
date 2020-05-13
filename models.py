@@ -45,7 +45,7 @@ def generate_compiled_segmentation_model(model_name, model_parameters, num_class
 
 def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_labels=1, initial_learning_rate=0.00001, deconvolution=False,
                                             depth=4, n_base_filters=32, include_label_wise_dice_coefficients=False, metrics=dice_coefficient,
-                                            batch_normalization=False, activation_name="sigmoid", weights_to_load=None):
+                                            loss=dice_coefficient_loss, batch_normalization=False, activation_name="sigmoid", weights_to_load=None):
     """
     Builds the 3D UNet Keras model.f
     :param metrics: List metrics to be calculated during model training (default is dice coefficient).
@@ -107,7 +107,7 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
         else:
             metrics = label_wise_dice_metrics
 
-    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=iou_coef_loss, metrics=metrics)
+    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=loss, metrics=metrics)
 
     if weights_to_load:
         model.load_weights(weights_to_load)
