@@ -107,7 +107,7 @@ def generate_compiled_3d_segmentation_model(input_shape, pool_size=(2, 2, 2), n_
         else:
             metrics = label_wise_dice_metrics
 
-    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=loss, metrics=metrics)
+    model.compile(optimizer=Adam(lr=initial_learning_rate), loss=iou_coef_loss, metrics=metrics)
 
     if weights_to_load:
         model.load_weights(weights_to_load)

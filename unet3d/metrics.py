@@ -51,8 +51,11 @@ def iou_coef(y_true, y_pred, smooth=1):
     """
     IoU = (|X &amp; Y|)/ (|X or Y|)
     """
-    intersection = K.sum(K.abs(y_true * y_pred), axis=-1)
-    union = K.sum(y_true, -1) + K.sum(y_pred, -1) - intersection
+    y_true_f = K.flatten(y_true)
+    y_pred_f = K.flatten(y_pred)
+
+    intersection = K.sum(K.abs(y_true_f * y_pred_f), axis=-1)
+    union = K.sum(y_true_f, -1) + K.sum(y_pred_f, -1) - intersection
     return (intersection + smooth) / (union + smooth)
 
 

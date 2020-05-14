@@ -207,7 +207,7 @@ def train(gcp_bucket, config_file):
             n_base_filters=12,
             depth=2,
             metrics=[tf.keras.metrics.MeanIoU(num_classes=2)],
-            loss=tf.keras.losses.BinaryCrossentropy()
+            # loss=tf.keras.losses.BinaryCrossentropy()
         )
 
         print(compiled_model.summary())
